@@ -35,7 +35,7 @@
   - **SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_{0}**
     - String, Optional. Only create this if the Virtual Instance SAML Admin has a Encryption Certificate and Private Key defined. Replace {0} with the Web Id of the Virtual Instance using the exact casing. For example SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_liferay.com where the value is the original password for the Encryption Certificate and Private Key from SAML Admin > General.
   - **If the environment has 3 SAML enabled Virtual Instances then there should be 3 versions of these...**
-- Add the paas-saml-config-restore OSGi module source code to the DXP Cloud Workspace (within Liferay > modules).
+- Add the saml-restore-tool-service OSGi module source code to the DXP Cloud Workspace (within Liferay > modules).
 - Add the changes to the GIT repository, allow the Liferay PaaS INFRA environment CI service to generate a new Liferay PaaS build, then deploy that build in the non-prod Liferay PaaS environment.
 
 ## saml-admin-configuration.properties ##
