@@ -22,8 +22,8 @@
     1. saml-admin-configuration.properties: A properties file containing the SAML Admin values to restore for this Virtual Instance. Start with the saml-restore-tool-config\saml-admin-configuration_TEMPLATE.properties file (from the repository), rename the file and update the values based on the table in the **saml-admin-configuration.properties** section. A sample file (saml-admin-configuration_SAMPLE.properties) is also included for reference.
   - 2. The SAML IdP Metadata XML file(s) e.g. idp-metadata-file.xml, using the same name as the corresponding *.idp.metadata.file property value in saml-admin-configuration.properties.
     - There should be one Metadata XML file per SAML Identify Provider defined in SAML Admin > Identity Provider Connections
-  - 3. The KeyStore where the 'restorable' (Signing) Certificate and Private Key and optionally the Encryption Certificate and Private Key are stored, using the same name as the key.store.file property value in saml-admin-configuration.properties. See **Steps to setup the 'restorable' KeyStore** section for steps to setup this KeyStore.
-- Add the Environment Variables to the environments Liferay Service - see **Steps to setup Environment Variables** section.
+  - 3. The KeyStore where the 'restorable' (Signing) Certificate and Private Key and optionally the Encryption Certificate and Private Key are stored, using the same name as the key.store.file property value in saml-admin-configuration.properties. See **Steps to setup the restorable KeyStore** section for steps to setup this KeyStore.
+- Add the Environment Variables to the environments Liferay Service - see **Steps to setup the Environment Variables** section.
 - Add the saml-restore-tool-service OSGi module source code to the DXP Cloud Workspace (within Liferay service modules folder) and confirm that the module successfully builds locally.
 - Add the changes to the GIT repository, allow the Liferay PaaS INFRA environment CI service to generate a new Liferay PaaS build, then deploy that build in the non-prod Liferay PaaS environment.
 
@@ -63,7 +63,7 @@
 - Use the mysql or psql client from the non-prod environment Liferay service shell to check the SamlSpIdPConnection table values e.g.
   - select userAttributeMappings, userIdentifierExpression from SamlSpIdPConnection where name = 'MW IdP';
 
-## Steps to setup the 'restorable' KeyStore ##
+## Steps to setup the restorable KeyStore ##
 - Use these steps to export the existing non-prod environment KeyStore so that the contents of the KeyStore can then be imported after the Backup and Restore has completed.
 - Find the non-prod environment KeyStore in the environments Liferay service file system. With the 'Document Library Keystore Manager' it will be the following in the Liferay service shell: /opt/liferay/data/document_library/[COMPANY_ID]/0/saml/keystore.jks/1.0 (where [COMPANY_ID] is the companyId for the relevant Virtual Instance and '1.0' is the KeyStore file).
 - Download a Liferay PaaS Document Library Backup to extract the KeyStore OR use the LCP CLI Tool to download the KeyStore file after copying it to the persistent-storage location first.
@@ -72,7 +72,7 @@
 - Select 'Set Password' from the KeyStore Explorer main menu and enter a new KeyStore Password and ensure the KeyStore is Saved after changing the Keystore Password.
   - Make a note of the new KeyStore Password as it will be used as the SAML_CONFIG_RESTORE_KEYSTORE_PASSWORD_{0} value for the Virtual Instance.
 
-## Steps to setup Environment Variables ##
+## Steps to setup the Environment Variables ##
 
 - Add the following Environment Variables to the environments Liferay Service via the Liferay Service LCP.json.
   - The ones marked 'Per Virtual Instance' should be created for each SAML enabled Virtual Instance in the environment.
