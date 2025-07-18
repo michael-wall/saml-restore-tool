@@ -178,8 +178,14 @@ Sample Liferay service LCP.com extract for the uat environment with a single Vir
 - The custom Gogo shell command and the related setup should not be used in a production environment. It is only intended for use in a non-production environment.
 - It is recommended to use the Liferay Service LCP.json to manage the Environment Variables to prevent them being overwritten or lost e.g. if the Liferay Service is deleted and re-deployed.
 - If the SAML Restore Tool doesn't succeed in updating a specific SAML Configuration it will attempt to set it as inactive.
+- The Liferay service must be running for the Gogo Shell to be available.
+- The SAML Restore Tool can be run before an Elasticsearch reindex has been triggered following a backup restore to the environment.
+- It is good practice to have a hidden public page (with Guest view access) containing the 'Sign In' widget, and a non-SSO enabled Administrator user account to get back into an SSO enabled system when the SSO is not working.
+  - The non-SSO enabled account(s) should have a secure Password Policy applied, and should be using Multi-Factor Authentication (MFA).
 
 ## Reference ##
 - https://keystore-explorer.org/
 - https://learn.liferay.com/w/dxp/cloud/reference/command-line-tool
 - https://learn.liferay.com/w/dxp/cloud/reference/command-line-tool#downloading-files-from-the-liferay-service
+- https://learn.liferay.com/w/dxp/security-and-administration/users-and-permissions/roles-and-permissions/configuring-a-password-policy
+- https://learn.liferay.com/w/dxp/security-and-administration/security/multi-factor-authentication
