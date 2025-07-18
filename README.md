@@ -32,7 +32,7 @@
 | Property  | Field Type | Type | Description |
 | -------- | ------- | ------- |  ------- |
 | company.virtual.host | String | SP | The Virtual Host for the Virtual Instance. See Control Panel > SYSTEM > Virtual Instances.|
-| saml.enabled | boolean | SP | SAML Admin > General > Enabled. |
+| saml.enabled | boolean | SP | SAML Admin > General > Enabled. Set this to false to restore the SAML configuration but not enable it. SAML can be manually enabled through the SAML Admin GUI afterwards.|
 | saml.sp.entity.id | String | SP | SAML Admin > General > Entity ID. |
 | key.store.file | String | SP | The restorable KeyStore file name. The KeyStore file must exist in the same folder as this properties file. |
 | has.encryption.cert | boolean | SP | Whether or not SAML Admin > General > Encryption Certificate and Private Key is defined. |
