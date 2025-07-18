@@ -11,31 +11,20 @@
   - Follows security good practice of prod and non-prod environments using separate Certificates and Private Keys etc.
   - Speeds up the Restore process by automating time consuming complex manual steps.
 
-## Non-prod Environment Setup ##
-- The following steps need to be completed once per non-prod environment (and then maintained for future SAML Admin configuration changes).
-- The configuration files and 'restorable' KeyStore become part of the Liferay PaaS build for the non-prod environment, so they won't get overwritten by a Backup being Restored from another environment into the non-prod environment.
-- Add the following Environment Variables > Regular variables to the environments Liferay Service:
-  - **SAML_RESTORE_TOOL_ENABLED**
-    - boolean, Mandatory. Set to true to enable the functionality. If not populated or not set to true then the saml restore functionality won't run.
-  - **SAML_RESTORE_TOOL_CONFIG_PATH**
-    - String, Mandatory. The folder containing the restorable SAML configuration folders. The path is relative to liferay.home portal property, for example /saml-restore-tool-config/virtual-instances will be liferay/saml-restore-tool-config/virtual-instances in Liferay PaaS.
-- Create the following folder structure within the Liferay Service folder of the DXP Cloud Workspace configs/[ENV]/saml-restore-tool-config/virtual-instances/ where [ENV] is a Liferay PaaS non-prod environment e.g. uat. **Do NOT create for prod or common...**
-- The DXP Cloud Workspace folder liferay/configs/[ENV]/saml-restore-tool-config/virtual-instances translates to /opt/liferay/saml-restore-tool-config/virtual-instances in the Liferay service shell.
-- Within the virtual-instances folder create a subfolder for each SAML enabled Virtual Instance usin the Web Id with exact casing e.g. configs/[ENV]/saml-restore-tool-config/virtual-instances/liferay.com
-- Inside each Virtual Instance Web Id folder add the following files:
-  - 1. saml-admin-configuration.properties: A properties file containing the SAML Admin values to restore for this Virtual Instance. Start with the saml-restore-tool-config\saml-admin-configuration_TEMPLATE.properties file (from the repository), rename the file and update the values based on the table in the **saml-admin-configuration.properties** section. A sample file (saml-admin-configuration_SAMPLE.properties) is also included for reference.
+## Non-prod Liferay PaaS Environment Setup ##
+- The following steps need to be completed once per non-prod environment (and then maintained for future SAML Admin configuration changes). The configuration files and 'restorable' KeyStore become part of the Liferay PaaS build for the non-prod environment, so they won't get overwritten by a Backup being Restored from another environment into the non-prod environment.
+- Create the following folder structure within the Liferay Service folder of the DXP Cloud Workspace:
+  - configs/[ENV]/saml-restore-tool-config/virtual-instances
+    - where [ENV] is a Liferay PaaS non-prod environment e.g. uat. **Do NOT create for prod or common...**
+    - The DXP Cloud Workspace folder liferay/configs/[ENV]/saml-restore-tool-config/virtual-instances translates to /opt/liferay/saml-restore-tool-config/virtual-instances in the Liferay service shell.
+  - Within the virtual-instances folder, create a subfolder for each SAML enabled Virtual Instance, using the Web ID with exact casing e.g. configs/[ENV]/saml-restore-tool-config/virtual-instances/liferay.com
+  - Inside each Virtual Instance Web ID folder add the following files:
+    1. saml-admin-configuration.properties: A properties file containing the SAML Admin values to restore for this Virtual Instance. Start with the saml-restore-tool-config\saml-admin-configuration_TEMPLATE.properties file (from the repository), rename the file and update the values based on the table in the **saml-admin-configuration.properties** section. A sample file (saml-admin-configuration_SAMPLE.properties) is also included for reference.
   - 2. The SAML IdP Metadata XML file(s) e.g. idp-metadata-file.xml, using the same name as the corresponding *.idp.metadata.file property value in saml-admin-configuration.properties.
     - There should be one Metadata XML file per SAML Identify Provider defined in SAML Admin > Identity Provider Connections
-  - 3. The KeyStore where the 'restorable' (Signing) Certificate and Private Key and Encryption Certificate and Private Key are stored, using the same name as the key.store.file property value in saml-admin-configuration.properties. See **Steps to setup the 'restorable' KeyStore** section for steps to setup this KeyStore.
-- Add the following Environment Variables > Secret Variables **for each of the SAML enabled Virtual Instances in the environment**, to the Liferay Service of the environment **ensuring the {0} is replaced** for each:
-  - **SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_{0}**
-    - String, Mandatory. Replace {0} with the Web Id of the Virtual Instance using the exact casing. For example SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_liferay.com where the value is the new KeyStore Password from the **Steps to setup the 'restorable' KeyStore** section.
-  - **SAML_RESTORE_TOOL_SIGNING_CERTIFICATE_PASSWORD_{0}**
-    - String, Mandatory. Replace {0} with the Web Id of the Virtual Instance using the exact casing. For example SAML_RESTORE_TOOL_CERTIFICATE_PASSWORD_liferay.com where the value is the original password for the (Signing) Certificate and Private Key from SAML Admin > General.
-  - **SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_{0}**
-    - String, Optional. Only create this if the Virtual Instance SAML Admin has a Encryption Certificate and Private Key defined. Replace {0} with the Web Id of the Virtual Instance using the exact casing. For example SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_liferay.com where the value is the original password for the Encryption Certificate and Private Key from SAML Admin > General.
-  - **If the environment has 3 SAML enabled Virtual Instances then there should be 3 versions of these...**
-- Add the saml-restore-tool-service OSGi module source code to the DXP Cloud Workspace (within Liferay > modules).
+  - 3. The KeyStore where the 'restorable' (Signing) Certificate and Private Key and optionally the Encryption Certificate and Private Key are stored, using the same name as the key.store.file property value in saml-admin-configuration.properties. See **Steps to setup the 'restorable' KeyStore** section for steps to setup this KeyStore.
+- Add the Environment Variables to the environments Liferay Service - see **Steps to setup Environment Variables** section.
+- Add the saml-restore-tool-service OSGi module source code to the DXP Cloud Workspace (within Liferay service modules folder) and confirm that the module successfully builds locally.
 - Add the changes to the GIT repository, allow the Liferay PaaS INFRA environment CI service to generate a new Liferay PaaS build, then deploy that build in the non-prod Liferay PaaS environment.
 
 ## saml-admin-configuration.properties ##
@@ -82,6 +71,39 @@
 - Launch KeyStore Explorer on your local computer and click 'Open an existing KeyStore' then select the KeyStore from above. The default password for the KeyStore is liferay
 - Select 'Set Password' from the KeyStore Explorer main menu and enter a new KeyStore Password and ensure the KeyStore is Saved after changing the Keystore Password.
   - Make a note of the new KeyStore Password as it will be used as the SAML_CONFIG_RESTORE_KEYSTORE_PASSWORD_{0} value for the Virtual Instance.
+
+## Steps to setup Environment Variables ##
+
+- Add the following Environment Variables to the environments Liferay Service via the Liferay Service LCP.json.
+  - The ones marked 'Per Virtual Instance' should be created for each SAML enabled Virtual Instance in the environment.
+  - The ones marked 'Secret' should first be defined as Secrets (Liferay PaaS Environment > Settings > Secrets) then mapped to corresponding Environment Variables in the Liferay Service LCP.json using the @ syntax.
+    - For example a Secret with the name 'saml-restore-tool-keystore-password-liferay.com' can be mapped in the LCP.json as follows:
+  
+    ```
+    "SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_liferay.com": "@saml-restore-tool-keystore-password-liferay.com"
+    ```
+
+| Name | Mandatory | Secret | Per Virtual Instance | Description |
+| -------- | ------- | ------- |  ------- | ------- |
+| **SAML_RESTORE_TOOL_ENABLED** | Yes | No | No | Set to true to enable the functionality. If not populated or not set to true then the saml restore functionality won't run. |
+| **SAML_RESTORE_TOOL_CONFIG_PATH** | Yes | No | No | The folder containing the restorable SAML configuration folders. The path is relative to liferay.home portal property, for example /saml-restore-tool-config/virtual-instances will be /opt/liferay/saml-restore-tool-config/virtual-instances in Liferay PaaS. |
+| **SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_{0}** | Yes | Yes | Yes | Replace {0} with the Web Id of the Virtual Instance using the exact casing. For example SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_liferay.com where the value is the new KeyStore Password from the **Steps to setup the 'restorable' KeyStore** section. |
+| **SAML_RESTORE_TOOL_SIGNING_CERTIFICATE_PASSWORD_{0}** | Yes | Yes | Yes | Replace {0} with the Web Id of the Virtual Instance using the exact casing. For example SAML_RESTORE_TOOL_CERTIFICATE_PASSWORD_liferay.com where the value is the original password for the (Signing) Certificate and Private Key from SAML Admin > General. |
+| **SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_{0}** | No | Yes | Yes | Only create this if the Virtual Instance SAML Admin has a Encryption Certificate and Private Key defined. Replace {0} with the Web Id of the Virtual Instance using the exact casing. For example SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_liferay.com where the value is the original password for the Encryption Certificate and Private Key from SAML Admin > General. |
+
+Sample Liferay service LCP.com extract for the uat environment with a single Virtual Instance with Web ID liferay.com using the @ secrets syntax:
+
+```
+    "uat": {
+      "env": {
+  	    "SAML_RESTORE_TOOL_ENABLED": "true",
+  	    "SAML_RESTORE_TOOL_CONFIG_PATH": "/saml-restore-tool-config/virtual-instances",
+  	    "SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_liferay.com": "@saml-restore-tool-keystore-password-liferay.com",
+  	    "SAML_RESTORE_TOOL_SIGNING_CERTIFICATE_PASSWORD_liferay.com": "@saml-restore-tool-signing-certificate-password-liferay.com",
+  	    "SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_liferay.com":"@saml-restore-tool-encryption-certificate-password-liferay.com"
+      }
+    }
+```
 
 ## Triggering the SAML Restore Tool in a Liferay PaaS non-prod environment ##
 - Ensure the steps in **Non-prod Environment Setup** have been completed in the non-prod environment before the Liferay PaaS backup is restored into the environment.
