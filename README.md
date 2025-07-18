@@ -78,12 +78,11 @@
   - The ones marked 'Per Virtual Instance' should be created for each SAML enabled Virtual Instance in the environment.
   	- Replace {0} with the Web ID of the Virtual Instance in UPPER CASE with . replaced with _ e.g. a Web ID of liferay.com would become SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_LIFERAY_COM
   - The ones marked 'Secret' should first be defined as Secrets (in Liferay PaaS Environment > Settings > Secrets) then mapped to corresponding Environment Variables in the Liferay Service LCP.json using the @ syntax.
-    - Note that the Secret name maximum length is 64 so the Secret name MAY need to be shortened, but the Environment Variable name MUST NOT be shortened.
-    - For example a Secret with the name 'saml-restore-tool-keystore-password-liferay.com' can be mapped in the LCP.json as follows:
-  
+    - For example an existing Secret with the name 'saml-restore-tool-keystore-password-liferay.com' can be mapped in the LCP.json as follows:
     ```
     "SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_LIFERAY_COM": "@saml-restore-tool-keystore-password-liferay.com"
     ```
+    - Note that the Secret name maximum length is 64 so the Secret name MAY need to be shortened, but the Environment Variable name MUST NOT be shortened.    
 
 | Name | Mandatory | Secret | Per Virtual Instance | Description |
 | -------- | ------- | ------- |  ------- | ------- |
