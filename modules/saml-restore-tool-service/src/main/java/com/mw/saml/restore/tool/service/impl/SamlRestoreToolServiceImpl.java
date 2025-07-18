@@ -501,17 +501,25 @@ public class SamlRestoreToolServiceImpl {
 		
 		VirtualInstanceSecretConfig virtualInstanceConfig = new VirtualInstanceSecretConfig(webId);
 
-		String keyStorePassword = System.getenv(SamlRestoreToolConstants.ENVIRONMENT_VARIABLES.SECRET.SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_PARAM.replaceAll("\\{0\\}", webId));
+		String keyStorePassword = System.getenv(getEnvironmentVariableName(SamlRestoreToolConstants.ENVIRONMENT_VARIABLES.SECRET.SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_PARAM, webId));
 		virtualInstanceConfig.setKeyStorePassword(keyStorePassword);
 		
-		String signingCertificatePassword = System.getenv(SamlRestoreToolConstants.ENVIRONMENT_VARIABLES.SECRET.SAML_RESTORE_TOOL_SIGNING_CERTIFICATE_PASSWORD_PARAM.replaceAll("\\{0\\}", webId));
+		String signingCertificatePassword = System.getenv(getEnvironmentVariableName(SamlRestoreToolConstants.ENVIRONMENT_VARIABLES.SECRET.SAML_RESTORE_TOOL_SIGNING_CERTIFICATE_PASSWORD_PARAM, webId));
 		virtualInstanceConfig.setSigningCertificatePassword(signingCertificatePassword);
 		
 		// Optional...
-		String encryptionCertificatePassword = System.getenv(SamlRestoreToolConstants.ENVIRONMENT_VARIABLES.SECRET.SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_PARAM.replaceAll("\\{0\\}", webId));
+		String encryptionCertificatePassword = System.getenv(getEnvironmentVariableName(SamlRestoreToolConstants.ENVIRONMENT_VARIABLES.SECRET.SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_PARAM, webId));
 		virtualInstanceConfig.setEncryptionCertificatePassword(encryptionCertificatePassword);
 
 		return virtualInstanceConfig;
+	}
+	
+	private String getEnvironmentVariableName(String constant, String webId) {
+		if (Validator.isNull(constant)) return constant;
+		
+		String name = constant.replace("{0}", webId).replace(".", "_").toUpperCase();
+	
+		return name;
 	}
 	
 	private CommonEnvironmentVariableConfig _getCommonConfig() {

@@ -76,20 +76,22 @@
 
 - Add the following Environment Variables to the environments Liferay Service via the Liferay Service LCP.json.
   - The ones marked 'Per Virtual Instance' should be created for each SAML enabled Virtual Instance in the environment.
-  - The ones marked 'Secret' should first be defined as Secrets (Liferay PaaS Environment > Settings > Secrets) then mapped to corresponding Environment Variables in the Liferay Service LCP.json using the @ syntax.
+  	- Replace {0} with the Web ID of the Virtual Instance in UPPER CASE with . replaced with _ e.g. a Web ID of liferay.com would become SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_LIFERAY_COM
+  - The ones marked 'Secret' should first be defined as Secrets (in Liferay PaaS Environment > Settings > Secrets) then mapped to corresponding Environment Variables in the Liferay Service LCP.json using the @ syntax.
+    - Note that the Secret name maximum length is 64 so the Secret name MAY need to be shortened, but the Environment Variable name MUST NOT be shortened.
     - For example a Secret with the name 'saml-restore-tool-keystore-password-liferay.com' can be mapped in the LCP.json as follows:
   
     ```
-    "SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_liferay.com": "@saml-restore-tool-keystore-password-liferay.com"
+    "SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_LIFERAY_COM": "@saml-restore-tool-keystore-password-liferay.com"
     ```
 
 | Name | Mandatory | Secret | Per Virtual Instance | Description |
 | -------- | ------- | ------- |  ------- | ------- |
 | **SAML_RESTORE_TOOL_ENABLED** | Yes | No | No | Set to true to enable the functionality. If not populated or not set to true then the saml restore functionality won't run. |
 | **SAML_RESTORE_TOOL_CONFIG_PATH** | Yes | No | No | The folder containing the restorable SAML configuration folders. The path is relative to liferay.home portal property, for example /saml-restore-tool-config/virtual-instances will be /opt/liferay/saml-restore-tool-config/virtual-instances in Liferay PaaS. |
-| **SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_{0}** | Yes | Yes | Yes | Replace {0} with the Web Id of the Virtual Instance using the exact casing. For example SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_liferay.com where the value is the new KeyStore Password from the **Steps to setup the 'restorable' KeyStore** section. |
-| **SAML_RESTORE_TOOL_SIGNING_CERTIFICATE_PASSWORD_{0}** | Yes | Yes | Yes | Replace {0} with the Web Id of the Virtual Instance using the exact casing. For example SAML_RESTORE_TOOL_CERTIFICATE_PASSWORD_liferay.com where the value is the original password for the (Signing) Certificate and Private Key from SAML Admin > General. |
-| **SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_{0}** | No | Yes | Yes | Only create this if the Virtual Instance SAML Admin has a Encryption Certificate and Private Key defined. Replace {0} with the Web Id of the Virtual Instance using the exact casing. For example SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_liferay.com where the value is the original password for the Encryption Certificate and Private Key from SAML Admin > General. |
+| **SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_{0}** | Yes | Yes | Yes | Value is the new KeyStore Password from the **Steps to setup the 'restorable' KeyStore** section. |
+| **SAML_RESTORE_TOOL_SIGNING_CERTIFICATE_PASSWORD_{0}** | Yes | Yes | Yes | The value is the original password for the (Signing) Certificate and Private Key from SAML Admin > General. |
+| **SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_{0}** | No | Yes | Yes | Only needed if the Virtual Instance SAML Admin has a Encryption Certificate and Private Key defined. Value is the original password for the Encryption Certificate and Private Key from SAML Admin > General. |
 
 Sample Liferay service LCP.com extract for the uat environment with a single Virtual Instance with Web ID liferay.com using the @ secrets syntax:
 
@@ -98,9 +100,9 @@ Sample Liferay service LCP.com extract for the uat environment with a single Vir
       "env": {
   	    "SAML_RESTORE_TOOL_ENABLED": "true",
   	    "SAML_RESTORE_TOOL_CONFIG_PATH": "/saml-restore-tool-config/virtual-instances",
-  	    "SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_liferay.com": "@saml-restore-tool-keystore-password-liferay.com",
-  	    "SAML_RESTORE_TOOL_SIGNING_CERTIFICATE_PASSWORD_liferay.com": "@saml-restore-tool-signing-certificate-password-liferay.com",
-  	    "SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_liferay.com":"@saml-restore-tool-encryption-certificate-password-liferay.com"
+  	    "SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_LIFERAY_COM": "@saml-restore-tool-keystore-password-liferay.com",
+  	    "SAML_RESTORE_TOOL_SIGNING_CERTIFICATE_PASSWORD_LIFERAY_COM": "@saml-restore-tool-signing-certificate-password-liferay.com",
+  	    "SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_LIFERAY_COM":"@saml-restore-tool-encryption-certificate-password-liferay.com"
       }
     }
 ```
