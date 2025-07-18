@@ -1,0 +1,3 @@
+Bundle-Name: saml-restore-tool-service
+Bundle-SymbolicName: com.mw.saml.restore.tool.service
+Bundle-Version: 1.0.0
