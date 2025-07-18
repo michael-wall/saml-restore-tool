@@ -184,7 +184,7 @@ Sample Liferay service LCP.com extract for the uat environment with a single Vir
 - The Liferay service must be running for the Gogo Shell to be available.
 - The SAML Restore Tool can be run before an Elasticsearch reindex has been triggered following a backup restore to the environment.
 - It is good practice to have a hidden public page (with Guest view access) containing the 'Sign In' widget, and a non-SSO enabled Administrator user account to get back into an SSO enabled system when the SSO is not working.
-  - The non-SSO enabled account(s) should have a secure Password Policy applied, and should be using Multi-Factor Authentication (MFA).
+  - The non-SSO enabled account(s) should be secured with a secure Password Policy and with Multi-Factor Authentication (MFA).
 
 ## Reference ##
 - https://keystore-explorer.org/
