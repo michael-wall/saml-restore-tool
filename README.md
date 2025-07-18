@@ -170,10 +170,12 @@ Sample Liferay service LCP.com extract for the uat environment with a single Vir
   - A simple workaround is to download the IdP Metadata XML file from the IdP Metadata URL and include the XML file in the config folder for the Virtual Instance and reference it in the saml-admin-configuration.properties file.
 
 ## Environment ##
-- The SAML Restore Tool hase been tested with:
+- The SAML Restore Tool has been tested with:
   -  Liferay DXP 2025.Q1.0 LTS (Liferay Workspace > gradle.properties > liferay.workspace.product = dxp-2025.q1.0-lts) and JDK 21 compile and runtime.
   -  Liferay DXP 2025.Q1.15 LTS (Liferay Workspace > gradle.properties > liferay.workspace.product = dxp-2025.q1.15-lts) and JDK 21 compile and runtime.
   - Liferay DXP 7.4 U92 (Liferay Workspace > gradle.properties > liferay.workspace.product = dxp-7.4-u92) with JDK11 compile and runtime.
+- The SAML Restore Tool has been tested in Liferay PaaS and Liferay Self Hosted.
+
 
 ## Notes ##
 - This is a ‘proof of concept’ that is being provided ‘as is’ without any support coverage or warranty.
