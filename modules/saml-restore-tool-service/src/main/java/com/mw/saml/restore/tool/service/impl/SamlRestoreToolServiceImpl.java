@@ -166,6 +166,26 @@ public class SamlRestoreToolServiceImpl {
 							continue;
 						}
 						
+						CompanyThreadLocal.setCompanyId(company.getCompanyId());
+	
+						if (_samlProviderConfigurationHelper.getSamlProviderConfiguration() == null || _samlProviderConfigurationHelper.getSamlProviderConfiguration().companyId() != company.getCompanyId()) {
+							_log.info("SAML SP Configuration missing for Web ID " + webIdFolderName + ".");
+	
+							virtualInstanceErrorCount ++;
+							virtualInstancesSAMLNotUpdated.add(webIdFolderName);
+								
+							continue;								
+						}
+						
+						if (!_samlProviderConfigurationHelper.isRoleSp()) {
+							_log.info("Unexpected SAML Role for Web ID " + webIdFolderName + ".");
+	
+							virtualInstanceErrorCount ++;
+							virtualInstancesSAMLNotUpdated.add(webIdFolderName);
+								
+							continue;							
+						}
+
 						for (int i = 1; i <= 10; i++) { // Assume no more than 10...
 							String dynamicPrefix = _idpPopertyPrefix(i);
 						
@@ -218,28 +238,7 @@ public class SamlRestoreToolServiceImpl {
 								
 							continue;								
 						}
-							
-						CompanyThreadLocal.setCompanyId(company.getCompanyId());
 
-						if (_samlProviderConfigurationHelper.getSamlProviderConfiguration() == null || _samlProviderConfigurationHelper.getSamlProviderConfiguration().companyId() != company.getCompanyId()) {
-							_log.info("SAML SP Configuration missing for Web ID " + webIdFolderName + ".");
-
-							virtualInstanceErrorCount ++;
-							virtualInstancesSAMLNotUpdated.add(webIdFolderName);
-								
-							continue;								
-						}
-						
-						
-						if (!_samlProviderConfigurationHelper.isRoleSp()) {
-							_log.info("Unexpected SAML Role for Web ID " + webIdFolderName + ".");
-
-							virtualInstanceErrorCount ++;
-							virtualInstancesSAMLNotUpdated.add(webIdFolderName);
-								
-							continue;							
-						}
-						
 						KeyStore virtualInstanceKeyStore = _replaceVirtualInstanceKeyStore(spConfig.hasEncryptionCert(), spConfig.getSamlSpEntityId(), instanceFolder, samlAdminConfigurationProperties, virtualInstanceConfig, webIdFolderName);
 
 						if (Validator.isNull(virtualInstanceKeyStore)) {
