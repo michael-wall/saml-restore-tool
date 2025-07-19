@@ -120,7 +120,6 @@ public class SamlRestoreToolServiceImpl {
 							_log.info("Unable to load properties from " + SamlRestoreToolConstants.SAML_ADMIN_CONFIGURATION_FILE + " for Web ID " + webIdFolderName + ".");
 							
 							virtualInstanceErrorCount ++;
-							
 							virtualInstancesSAMLNotUpdated.add(webIdFolderName);
 							
 							continue;								
@@ -133,7 +132,6 @@ public class SamlRestoreToolServiceImpl {
 							_log.info("Basic validation of " + SamlRestoreToolConstants.SAML_ADMIN_CONFIGURATION_FILE + " failed for Web ID " + webIdFolderName + ".");
 							
 							virtualInstanceErrorCount ++;
-							
 							virtualInstancesSAMLNotUpdated.add(webIdFolderName);
 							
 							continue;								
@@ -149,7 +147,6 @@ public class SamlRestoreToolServiceImpl {
 							_log.info("Company not found by fetchCompanyByVirtualHost for company.virtual.host " + virtualHost + " for Web ID " + webIdFolderName + ".");
 							
 							virtualInstanceErrorCount ++;
-							
 							virtualInstancesSAMLNotUpdated.add(webIdFolderName);
 								
 							continue;
@@ -164,7 +161,6 @@ public class SamlRestoreToolServiceImpl {
 							_log.info("Mandatory secrets not configured as expected for Web ID " + webIdFolderName + ".");
 
 							virtualInstanceErrorCount ++;
-							
 							virtualInstancesSAMLNotUpdated.add(webIdFolderName);
 							
 							continue;
@@ -198,7 +194,6 @@ public class SamlRestoreToolServiceImpl {
 							_log.info("No IdP configurations in the properties file for Web ID " + webIdFolderName + ".");
 
 							virtualInstanceErrorCount ++;
-								
 							virtualInstancesSAMLNotUpdated.add(webIdFolderName);
 							
 							continue;								
@@ -206,7 +201,6 @@ public class SamlRestoreToolServiceImpl {
 							_log.info("One of more invalid or incomplete IdP configurations in the properties file for Web ID " + webIdFolderName + ".");
 
 							virtualInstanceErrorCount ++;
-								
 							virtualInstancesSAMLNotUpdated.add(webIdFolderName);
 								
 							continue;									
@@ -220,14 +214,32 @@ public class SamlRestoreToolServiceImpl {
 							_log.info("Secret " + encryptionCertificatePassword + " missing for Web ID " + webIdFolderName + ".");
 
 							virtualInstanceErrorCount ++;
-								
 							virtualInstancesSAMLNotUpdated.add(webIdFolderName);
 								
 							continue;								
 						}
 							
 						CompanyThreadLocal.setCompanyId(company.getCompanyId());
-							
+
+						if (_samlProviderConfigurationHelper.getSamlProviderConfiguration() == null || _samlProviderConfigurationHelper.getSamlProviderConfiguration().companyId() != company.getCompanyId()) {
+							_log.info("SAML SP Configuration missing for Web ID " + webIdFolderName + ".");
+
+							virtualInstanceErrorCount ++;
+							virtualInstancesSAMLNotUpdated.add(webIdFolderName);
+								
+							continue;								
+						}
+						
+						
+						if (!_samlProviderConfigurationHelper.isRoleSp()) {
+							_log.info("Unexpected SAML Role for Web ID " + webIdFolderName + ".");
+
+							virtualInstanceErrorCount ++;
+							virtualInstancesSAMLNotUpdated.add(webIdFolderName);
+								
+							continue;							
+						}
+						
 						KeyStore virtualInstanceKeyStore = _replaceVirtualInstanceKeyStore(spConfig.hasEncryptionCert(), spConfig.getSamlSpEntityId(), instanceFolder, samlAdminConfigurationProperties, virtualInstanceConfig, webIdFolderName);
 
 						if (Validator.isNull(virtualInstanceKeyStore)) {
@@ -236,7 +248,6 @@ public class SamlRestoreToolServiceImpl {
 							_configureSamlSpProperties(false, spConfig, null, webIdFolderName, true, false);
 
 							virtualInstanceErrorCount ++;
-								
 							virtualInstancesSAMLNotUpdated.add(webIdFolderName);
 								
 							continue;
@@ -247,8 +258,24 @@ public class SamlRestoreToolServiceImpl {
 						
 						_deleteSpIdpConnections(company.getCompanyId(), webIdFolderName);
 						
+						long idpConfigCount = idPConfigs.size();
+						long idpCreateSuccessCount = 0;
+						
 						for (IdPConfig idpConfig: idPConfigs) {
-							_createSamlSpIdpConnection(idpConfig, instanceFolder, webIdFolderName);
+							boolean idpCreateSuccess = _createSamlSpIdpConnection(idpConfig, instanceFolder, webIdFolderName);
+							
+							if (idpCreateSuccess) idpCreateSuccessCount ++;
+						}
+						
+						if (idpCreateSuccessCount != idpConfigCount) {
+							_log.error("An error occurred recreating one of more IdP Connections for SP Entity ID " + spConfig.getSamlSpEntityId() + " for Web ID " + webIdFolderName + ".");
+							
+							_configureSamlSpProperties(false, spConfig, null, webIdFolderName, true, false);
+
+							virtualInstanceErrorCount ++;
+							virtualInstancesSAMLNotUpdated.add(webIdFolderName);
+								
+							continue;							
 						}
 						
 						_configureSamlSpProperties(spConfig.isSamlEnabled(), spConfig, virtualInstanceConfig, webIdFolderName, false, false);
@@ -258,19 +285,17 @@ public class SamlRestoreToolServiceImpl {
 						virtualInstancesSAMLRestored.add(webIdFolderName);
 					} catch (Exception e) {
 						virtualInstanceErrorCount++;
-						
 						virtualInstancesSAMLNotUpdated.add(webIdFolderName);
 						
-						_log.error(e.getClass() + e.getMessage());
+						_log.error(e.getClass() + ": " + e.getMessage());
 
 						try {
 							if (Validator.isNotNull(spConfig)) { // Deactivate SAML if we know an error occurred during processing..
 								_configureSamlSpProperties(false, spConfig, null, webIdFolderName, true, false);
 							}
-						}
-						catch (Exception ex) {
+						} catch (Exception ex) {
 							_log.error("Error trying to disable SAML Configuration for SP Entity ID " + spConfig.getSamlSpEntityId() + " for Web ID " + webIdFolderName + ".");
-							_log.error(ex.getClass() + " " + ex.getMessage());
+							_log.error(ex.getClass() + ": " + ex.getMessage());
 						}
 						
 						continue;
@@ -300,7 +325,7 @@ public class SamlRestoreToolServiceImpl {
 		return "idp" + pos + ".";
 	}
 	
-	private void _createSamlSpIdpConnection(
+	private boolean _createSamlSpIdpConnection(
 		IdPConfig idpConfig,
 		File instanceFolder,
 		String webIdFolderName) {
@@ -335,11 +360,18 @@ public class SamlRestoreToolServiceImpl {
 					serviceContext);
 
 			_log.info("A new SAML IdP Connection " + samlSpIdpConnection.getName() + " for IdP Entity ID " + samlSpIdpConnection.getSamlIdpEntityId() + " has been successfully created for Web ID " + webIdFolderName + ".");
+			
+			return true;
+			
 		} catch (PortalException e) {
 			_log.error("Unable to add IdP Connection with IdP Entity ID " + idpConfig.getSamlIdpEntityId() + " for Web ID " + webIdFolderName + ".");
-			_log.error(e.getClass() + " " + e.getMessage());
-		} catch (FileNotFoundException ex) {
-			_log.error(ex.getClass() + " " + ex.getMessage());		
+			_log.error(e.getClass() + ": " + e.getMessage());
+		} catch (FileNotFoundException e) {
+			_log.error("Unable to add IdP Connection with IdP Entity ID " + idpConfig.getSamlIdpEntityId() + " for Web ID " + webIdFolderName + ".");
+			_log.error(e.getClass() + ": " + e.getMessage());		
+		} catch (Exception e) {
+			_log.error("Unable to add IdP Connection with IdP Entity ID " + idpConfig.getSamlIdpEntityId() + " for Web ID " + webIdFolderName + ".");
+			_log.error(e.getClass() + ": " + e.getMessage());		
 		} finally {
 			if (metadataXMLInputStream != null) {
 				try {
@@ -347,6 +379,8 @@ public class SamlRestoreToolServiceImpl {
 				} catch (IOException e) {}
 			}
 		}
+		
+		return false;
 	}
 
 	private void _configureSamlSpProperties(
@@ -377,10 +411,12 @@ public class SamlRestoreToolServiceImpl {
 			i -> {
 				try {
 					_samlSpIdpConnectionLocalService.deleteSamlSpIdpConnection(i.getSamlSpIdpConnectionId());
-				}
-				catch (PortalException e) {
+				} catch (PortalException e) {
 					_log.error("Error while trying to delete the SAML IdP Connection with Name " + i.getName() + " for Web ID " + webIdFolderName + ".");
-					_log.error(e.getClass() + " " + e.getMessage());
+					_log.error(e.getClass() + ": " + e.getMessage());
+				} catch (Exception e) {
+					_log.error("Error while trying to delete the SAML IdP Connection with Name " + i.getName() + " for Web ID " + webIdFolderName + ".");
+					_log.error(e.getClass() + ": " + e.getMessage());
 				}
 			}
 		);
@@ -417,7 +453,7 @@ public class SamlRestoreToolServiceImpl {
 		}
 		catch (Exception e) {
 			_log.error("Error calling _replaceVirtualInstanceKeyStore for SP Entity ID " + samlSpEntityId + " for Web ID " + webIdFolderName + ".");	
-			_log.error(e.getClass() + " " + e.getMessage());
+			_log.error(e.getClass() + ": " + e.getMessage());
 			
 			return null;
 		} finally {
@@ -432,9 +468,10 @@ public class SamlRestoreToolServiceImpl {
 
 		try {
 			tempKeyStore = _keyStoreManager.getKeyStore();
-		}
-		catch (KeyStoreException ke) {
-			_log.error(ke.getClass() + " " + ke.getMessage());
+		} catch (KeyStoreException e) {
+			_log.error(e.getClass() + ": " + e.getMessage());
+		} catch (Exception e) {
+			_log.error(e.getClass() + ": " + e.getMessage());
 		}
 
 		boolean signingCertificateVerified = _verifySigningCertificate(samlSpEntityId, virtualInstanceConfig, tempKeyStore);
@@ -477,7 +514,7 @@ public class SamlRestoreToolServiceImpl {
 			
 			return true;
 		} catch (Exception e) {
-			_log.error(e.getClass() + " " + e.getMessage());
+			_log.error(e.getClass() + ": " + e.getMessage());
 			
 			return false;
 		}
@@ -491,7 +528,7 @@ public class SamlRestoreToolServiceImpl {
 			
 			return true;
 		} catch (Exception e) {
-			_log.error(e.getClass() + " " + e.getMessage());
+			_log.error(e.getClass() + ": " + e.getMessage());
 			
 			return false;
 		}
