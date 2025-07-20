@@ -590,7 +590,7 @@ public class SamlRestoreToolServiceImpl {
 	private String getEnvironmentVariableName(String key, String secretParamValue) {
 		if (Validator.isNull(key)) return key;
 		
-		String name = key.replace("{0}", secretParamValue).toUpperCase();
+		String name = key.replace("{0}", secretParamValue);
 	
 		return name;
 	}
