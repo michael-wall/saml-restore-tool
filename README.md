@@ -17,7 +17,7 @@
   - configs/[ENV]/saml-restore-tool-config/virtual-instances
     - where [ENV] is a Liferay PaaS non-prod environment e.g. uat. **Do NOT create for prod or common...**
     - The DXP Cloud Workspace folder liferay/configs/[ENV]/saml-restore-tool-config/virtual-instances translates to /opt/liferay/saml-restore-tool-config/virtual-instances in the Liferay service shell.
-  - Within the virtual-instances folder, create a subfolder for each SAML enabled Virtual Instance, using the Web ID with exact casing e.g. configs/[ENV]/saml-restore-tool-config/virtual-instances/liferay.com
+  - Within the virtual-instances folder, create a subfolder for each SAML enabled Virtual Instance, using the case sensitive Virtual Instance Web ID e.g. configs/[ENV]/saml-restore-tool-config/virtual-instances/liferay.com
   - Inside each Virtual Instance Web ID folder add the following files:
     1. saml-admin-configuration.properties: A properties file containing the SAML Admin values to restore for this Virtual Instance. Start with the saml-restore-tool-config\saml-admin-configuration_TEMPLATE.properties file (from the repository), rename the file and update the values based on the table in the **saml-admin-configuration.properties** section. A sample file (saml-admin-configuration_SAMPLE.properties) is also included for reference.
   - 2. The SAML IdP Metadata XML file(s) e.g. idp-metadata-file.xml, using the same name as the corresponding *.idp.metadata.file property value in saml-admin-configuration.properties.
@@ -31,7 +31,8 @@
 
 | Property  | Field Type | Type | Description |
 | -------- | ------- | ------- |  ------- |
-| company.virtual.host | String | SP | The Virtual Host for the Virtual Instance. See Control Panel > SYSTEM > Virtual Instances.|
+| company.virtual.host | String | NA | The Virtual Host for the Virtual Instance. See Control Panel > System > Virtual Instances.|
+| secret.param | String | NA | Used to map to the parameterised Environment Variables for this Virtual Instance. Must contain UPPER CASE and _ chars only. For example Virtual Instance Web ID liferay.com becomes LIFERAY_COM or mw-test.com becomes MW_TEST_COM etc.|
 | saml.enabled | boolean | SP | SAML Admin > General > Enabled. Set this to false to restore the SAML configuration but not enable it. SAML can be manually enabled through the SAML Admin GUI afterwards.|
 | saml.sp.entity.id | String | SP | SAML Admin > General > Entity ID. |
 | key.store.file | String | SP | The restorable KeyStore file name. The KeyStore file must exist in the same folder as this properties file. |
@@ -76,7 +77,7 @@
 
 - Add the following Environment Variables to the environments Liferay Service via the Liferay Service LCP.json.
   - The ones marked 'Per Virtual Instance' should be created for each SAML enabled Virtual Instance in the environment.
-  	- Replace {0} with the Web ID of the Virtual Instance in UPPER CASE with . replaced with _ e.g. a Web ID of liferay.com would become SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_LIFERAY_COM
+  	- Replace {0} with the secret.param value from saml-admin-configuration.properties _ e.g. a secret.param value of LIFERAY_COM would correspond to SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_LIFERAY_COM
   - The ones marked 'Secret' should first be defined as Secrets (in Liferay PaaS Environment > Settings > Secrets) then mapped to corresponding Environment Variables in the Liferay Service LCP.json using the @ syntax.
     - For example an existing Secret with the name 'saml-restore-tool-keystore-password-liferay.com' can be mapped in the LCP.json as follows:
     ```
@@ -92,7 +93,7 @@
 | **SAML_RESTORE_TOOL_SIGNING_CERTIFICATE_PASSWORD_{0}** | Yes | Yes | Yes | The value is the original password for the (Signing) Certificate and Private Key from SAML Admin > General. |
 | **SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_{0}** | No | Yes | Yes | Only needed if the Virtual Instance SAML Admin has a Encryption Certificate and Private Key defined. Value is the original password for the Encryption Certificate and Private Key from SAML Admin > General. |
 
-Sample Liferay service LCP.com extract for the uat environment with a single Virtual Instance with Web ID liferay.com using the @ secrets syntax:
+Sample Liferay service LCP.com extract for the uat environment with a single Virtual Instance with secret.param value of LIFERAY_COM using the @ secrets syntax:
 
 ```
     "uat": {
@@ -121,21 +122,21 @@ Sample Liferay service LCP.com extract for the uat environment with a single Vir
 ## Sample Logging outout ##
 ```
 [SamlRestoreToolServiceImpl:61] Started running restoreSamlConfig.
-[SamlRestoreToolServiceImpl:63] Environment uses com.liferay.saml.opensaml.integration.internal.credential.DLKeyStoreManagerImpl
-[SamlRestoreToolServiceImpl:108] Started processing SAML configuration for Web ID liferay.com
-[SamlRestoreToolServiceImpl:202] IdP count is 2 for Web ID liferay.com.
-[SamlRestoreToolServiceImpl:416] The restorable SAML KeyStore has been successfully loaded for SP Entity ID mw-sp for Web ID liferay.com.
-[SamlRestoreToolServiceImpl:423] The SAML KeyStore has been successfully updated for SP Entity ID mw-sp for Web ID liferay.com.
-[SamlRestoreToolServiceImpl:450] The (Signing) Certificate and Private Key have been successfully verified for SP Entity ID mw-sp for Web ID liferay.com.
-[SamlRestoreToolServiceImpl:462] The Encryption Certificate and Private Key have been successfully verified for SP Entity ID mw-sp for Web ID liferay.com.
-[SamlRestoreToolServiceImpl:344] A new SAML IdP Connection Keycloak IdP 1 for IdP Entity ID http://localhost:8088/realms/mw has been successfully created for Web ID liferay.com.
-[SamlRestoreToolServiceImpl:344] A new SAML IdP Connection Keycloak IdP 2 for IdP Entity ID http://mw.com:8088/realms/mw has been successfully created for Web ID liferay.com.
-[SamlRestoreToolServiceImpl:375] The SAML SP Configuration has been successfully updated for SP Entity ID mw-sp for Web ID liferay.com and SAML is now enabled.
-[SamlRestoreToolServiceImpl:263] Finished processing SAML configuration for SP Entity ID mw-sp for Web ID liferay.com.
-[SamlRestoreToolServiceImpl:289] SAML configurations restored: 1
-[SamlRestoreToolServiceImpl:293]  > liferay.com, SAML has been restored successfully.
-[SamlRestoreToolServiceImpl:296] SAML configurations not restored: 0
-[SamlRestoreToolServiceImpl:303] Finished running restoreSamlConfig.
+[SamlRestoreToolServiceImpl:62] Environment uses com.liferay.saml.opensaml.integration.internal.credential.DLKeyStoreManagerImpl
+[SamlRestoreToolServiceImpl:130] liferay.com: Started processing SAML configuration.
+[SamlRestoreToolServiceImpl:234] liferay.com: IdP count is 2.
+[SamlRestoreToolServiceImpl:481] liferay.com: The restorable SAML KeyStore has been successfully loaded for SP Entity ID mw-sp.
+[SamlRestoreToolServiceImpl:488] liferay.com: The SAML KeyStore has been successfully updated for SP Entity ID mw-sp.
+[SamlRestoreToolServiceImpl:516] liferay.com: The (Signing) Certificate and Private Key have been successfully verified for SP Entity ID mw-sp.
+[SamlRestoreToolServiceImpl:528] liferay.com: The Encryption Certificate and Private Key have been successfully verified for SP Entity ID mw-sp.
+[SamlRestoreToolServiceImpl:398] liferay.com: A new SAML IdP Connection Keycloak IdP 1 for IdP Entity ID http://localhost:8088/realms/mw has been successfully created.
+[SamlRestoreToolServiceImpl:398] liferay.com: A new SAML IdP Connection Keycloak IdP 2 for IdP Entity ID http://mw.com:8088/realms/mw has been successfully created.
+[SamlRestoreToolServiceImpl:438] liferay.com: The SAML SP Configuration has been successfully updated for SP Entity ID mw-sp and SAML is now enabled.
+[SamlRestoreToolServiceImpl:305] liferay.com: Finished processing SAML configuration for SP Entity ID mw-sp.
+[SamlRestoreToolServiceImpl:332] SAML configurations restored: 1
+[SamlRestoreToolServiceImpl:336]  > liferay.com, SAML has been restored successfully.
+[SamlRestoreToolServiceImpl:341] SAML configurations not restored: 0
+[SamlRestoreToolServiceImpl:352] Finished running restoreSamlConfig.
 ```
 
 ## Using the SAML Restore Tool outside of Liferay PaaS ##
