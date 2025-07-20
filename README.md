@@ -123,7 +123,7 @@ Sample Liferay service LCP.com extract for the uat environment with a single Vir
 ```
 [SamlRestoreToolServiceImpl:...] Started running restoreSamlConfig.
 [SamlRestoreToolServiceImpl:...] Environment uses com.liferay.saml.opensaml.integration.internal.credential.DLKeyStoreManagerImpl
-[SamlRestoreToolServiceImpl:...] liferay.com: Started processing SAML configuration.
+[SamlRestoreToolServiceImpl:...] liferay.com: Started processing SAML restore configuration.
 [SamlRestoreToolServiceImpl:...] liferay.com: IdP count is 2.
 [SamlRestoreToolServiceImpl:...] liferay.com: The restorable SAML KeyStore has been successfully loaded for SP Entity ID mw-sp.
 [SamlRestoreToolServiceImpl:...] liferay.com: The SAML KeyStore has been successfully updated for SP Entity ID mw-sp.
