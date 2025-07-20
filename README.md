@@ -119,24 +119,24 @@ Sample Liferay service LCP.com extract for the uat environment with a single Vir
   - Manually update the SAML Admin > Identity Provider Connections > Connection > Keep Alive URL value through the Liferat SAML Admin GUI if this field is used. 
   - If the SAML Restore was successful then SAML SSO users should be able to login to the non-prod environment with the original SAML Admin configuration from before the Backup was Restored.
  
-## Sample Logging outout ##
+## Sample Success Logging Outout ##
 ```
-[SamlRestoreToolServiceImpl:61] Started running restoreSamlConfig.
-[SamlRestoreToolServiceImpl:62] Environment uses com.liferay.saml.opensaml.integration.internal.credential.DLKeyStoreManagerImpl
-[SamlRestoreToolServiceImpl:130] liferay.com: Started processing SAML configuration.
-[SamlRestoreToolServiceImpl:234] liferay.com: IdP count is 2.
-[SamlRestoreToolServiceImpl:481] liferay.com: The restorable SAML KeyStore has been successfully loaded for SP Entity ID mw-sp.
-[SamlRestoreToolServiceImpl:488] liferay.com: The SAML KeyStore has been successfully updated for SP Entity ID mw-sp.
-[SamlRestoreToolServiceImpl:516] liferay.com: The (Signing) Certificate and Private Key have been successfully verified for SP Entity ID mw-sp.
-[SamlRestoreToolServiceImpl:528] liferay.com: The Encryption Certificate and Private Key have been successfully verified for SP Entity ID mw-sp.
-[SamlRestoreToolServiceImpl:398] liferay.com: A new SAML IdP Connection Keycloak IdP 1 for IdP Entity ID http://localhost:8088/realms/mw has been successfully created.
-[SamlRestoreToolServiceImpl:398] liferay.com: A new SAML IdP Connection Keycloak IdP 2 for IdP Entity ID http://mw.com:8088/realms/mw has been successfully created.
-[SamlRestoreToolServiceImpl:438] liferay.com: The SAML SP Configuration has been successfully updated for SP Entity ID mw-sp and SAML is now enabled.
-[SamlRestoreToolServiceImpl:305] liferay.com: Finished processing SAML configuration for SP Entity ID mw-sp.
-[SamlRestoreToolServiceImpl:332] SAML configurations restored: 1
-[SamlRestoreToolServiceImpl:336]  > liferay.com, SAML has been restored successfully.
-[SamlRestoreToolServiceImpl:341] SAML configurations not restored: 0
-[SamlRestoreToolServiceImpl:352] Finished running restoreSamlConfig.
+[SamlRestoreToolServiceImpl:...] Started running restoreSamlConfig.
+[SamlRestoreToolServiceImpl:...] Environment uses com.liferay.saml.opensaml.integration.internal.credential.DLKeyStoreManagerImpl
+[SamlRestoreToolServiceImpl:...] liferay.com: Started processing SAML configuration.
+[SamlRestoreToolServiceImpl:...] liferay.com: IdP count is 2.
+[SamlRestoreToolServiceImpl:...] liferay.com: The restorable SAML KeyStore has been successfully loaded for SP Entity ID mw-sp.
+[SamlRestoreToolServiceImpl:...] liferay.com: The SAML KeyStore has been successfully updated for SP Entity ID mw-sp.
+[SamlRestoreToolServiceImpl:...] liferay.com: The (Signing) Certificate and Private Key have been successfully verified for SP Entity ID mw-sp.
+[SamlRestoreToolServiceImpl:...] liferay.com: The Encryption Certificate and Private Key have been successfully verified for SP Entity ID mw-sp.
+[SamlRestoreToolServiceImpl:...] liferay.com: A new SAML IdP Connection Keycloak IdP 1 for IdP Entity ID http://localhost:8088/realms/mw has been successfully created.
+[SamlRestoreToolServiceImpl:...] liferay.com: A new SAML IdP Connection Keycloak IdP 2 for IdP Entity ID http://mw.com:8088/realms/mw has been successfully created.
+[SamlRestoreToolServiceImpl:...] liferay.com: The SAML SP Configuration has been successfully updated for SP Entity ID mw-sp and SAML is now enabled.
+[SamlRestoreToolServiceImpl:...] liferay.com: Finished processing SAML configuration for SP Entity ID mw-sp.
+[SamlRestoreToolServiceImpl:...] SAML configurations restored: 1
+[SamlRestoreToolServiceImpl:...]  > liferay.com, SAML has been restored successfully.
+[SamlRestoreToolServiceImpl:...] SAML configurations not restored: 0
+[SamlRestoreToolServiceImpl:...] Finished running restoreSamlConfig.
 ```
 
 ## Using the SAML Restore Tool outside of Liferay PaaS ##
