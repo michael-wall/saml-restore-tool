@@ -37,6 +37,7 @@ import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -124,204 +125,254 @@ public class SamlRestoreToolServiceImpl {
 			return output;
 		}
 		for (File instanceFolder : configRootFolder.listFiles()) {
-			if (instanceFolder.isDirectory()) {
-				String virtualInstanceFolderName = instanceFolder.getName();
+			if (!instanceFolder.isDirectory()) { // Skip if not folder
+				continue;
+			}
+		
+			String virtualInstanceFolderName = instanceFolder.getName();
+			
+			_log.info(virtualInstanceFolderName + ": Started processing SAML restore configuration.");
+			
+			File[] folderFiles = instanceFolder.listFiles(new FileFilter() {
+				@Override
+				public boolean accept(File file) {
+					return file.isFile();
+				}
+			});
+			
+			if (folderFiles == null || folderFiles.length < 3) {
+				_log.info(virtualInstanceFolderName + ": Folder doesn't contain expected files.");
 				
-				_log.info(virtualInstanceFolderName + ": Started processing SAML configuration.");
+				virtualInstanceErrorCount ++;
+				virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
 				
-				List<IdPConfig> idPConfigs = new ArrayList<IdPConfig>();
-				long invalidIdPCount = 0;
+				continue; // Skip to next folder		
+			}
+			
+			if (!containsFile(folderFiles, SamlRestoreToolConstants.SAML_ADMIN_CONFIGURATION_FILE)) {
+				_log.info(virtualInstanceFolderName + ": Configuration file " + SamlRestoreToolConstants.SAML_ADMIN_CONFIGURATION_FILE + " is missing.");
 				
-				SPConfig spConfig = null;
-				Company company = null;
+				virtualInstanceErrorCount ++;
+				virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
 				
-				try {
-					Properties samlAdminConfigurationProperties = SamlRestoreToolUtil.loadPropertiesFile(instanceFolder.getPath() + StringPool.FORWARD_SLASH + SamlRestoreToolConstants.SAML_ADMIN_CONFIGURATION_FILE);
+				continue; // Skip to next folder		
+			}
+			
+			List<IdPConfig> idPConfigs = new ArrayList<IdPConfig>();
+			long invalidIdPCount = 0;
+			
+			SPConfig spConfig = null;
+			Company company = null;
+			
+			try {
+				Properties samlAdminConfigurationProperties = SamlRestoreToolUtil.loadPropertiesFile(instanceFolder.getPath() + StringPool.FORWARD_SLASH + SamlRestoreToolConstants.SAML_ADMIN_CONFIGURATION_FILE);
+				
+				if (Validator.isNull(samlAdminConfigurationProperties)) {
+					_log.info(virtualInstanceFolderName + ": Unable to load properties from " + SamlRestoreToolConstants.SAML_ADMIN_CONFIGURATION_FILE + ".");
 					
-					if (Validator.isNull(samlAdminConfigurationProperties)) {
-						_log.info(virtualInstanceFolderName + ": Unable to load properties from " + SamlRestoreToolConstants.SAML_ADMIN_CONFIGURATION_FILE + ".");
-						
-						virtualInstanceErrorCount ++;
-						virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
-						
-						continue; // Skip to next folder
-					}
-						
-					//Basic Validation of properties before progressing...
-					boolean isValidBasic = SamlRestoreToolUtil.isValidBasic(_idpPopertyPrefix(1), samlAdminConfigurationProperties);
+					virtualInstanceErrorCount ++;
+					virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
 					
-					if (!isValidBasic) {
-						_log.info(virtualInstanceFolderName + ": Basic validation of " + SamlRestoreToolConstants.SAML_ADMIN_CONFIGURATION_FILE + " failed.");
-						
-						virtualInstanceErrorCount ++;
-						virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
-						
-						continue; // Skip to next folder
-					}
+					continue; // Skip to next folder
+				}
 					
-					String virtualHost = samlAdminConfigurationProperties.getProperty(SamlRestoreToolConstants.PROPERTIES.MAPPING.COMPANY_VIRTUAL_HOST);
-					String secretParamValue = samlAdminConfigurationProperties.getProperty(SamlRestoreToolConstants.PROPERTIES.MAPPING.SECRET_PARAM);
+				//Basic Validation of properties before progressing...
+				boolean isValidBasic = SamlRestoreToolUtil.isValidBasic(_idpPopertyPrefix(1), samlAdminConfigurationProperties);
+				
+				if (!isValidBasic) {
+					_log.info(virtualInstanceFolderName + ": Basic validation of " + SamlRestoreToolConstants.SAML_ADMIN_CONFIGURATION_FILE + " failed.");
 					
-					if (!Validator.isNull(virtualHost)) {
-						company = _companyLocalService.fetchCompanyByVirtualHost(virtualHost);
-					}
+					virtualInstanceErrorCount ++;
+					virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
+					
+					continue; // Skip to next folder
+				}
+				
+				String restorableKeyStoreFileName = samlAdminConfigurationProperties.getProperty(SamlRestoreToolConstants.PROPERTIES.SP.KEY_STORE_FILE);
+				
+				if (!containsFile(folderFiles, restorableKeyStoreFileName)) {
+					_log.info(virtualInstanceFolderName + ": Keystore file " + restorableKeyStoreFileName + " is missing.");
+					
+					virtualInstanceErrorCount ++;
+					virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
+					
+					continue; // Skip to next folder					
+				}
+				
+				String virtualHost = samlAdminConfigurationProperties.getProperty(SamlRestoreToolConstants.PROPERTIES.MAPPING.COMPANY_VIRTUAL_HOST);
+				String secretParamValue = samlAdminConfigurationProperties.getProperty(SamlRestoreToolConstants.PROPERTIES.MAPPING.SECRET_PARAM);
+				
+				if (!Validator.isNull(virtualHost)) {
+					company = _companyLocalService.fetchCompanyByVirtualHost(virtualHost);
+				}
+					
+				if (company == null) {
+					_log.info(virtualInstanceFolderName + ": Company not found by fetchCompanyByVirtualHost for company.virtual.host " + virtualHost + ".");
+					
+					virtualInstanceErrorCount ++;
+					virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
 						
-					if (company == null) {
-						_log.info(virtualInstanceFolderName + ": Company not found by fetchCompanyByVirtualHost for company.virtual.host " + virtualHost + ".");
+					continue; // Skip to next folder
+				}
+					
+				VirtualInstanceSecretConfig virtualInstanceConfig = _getVirtualInstanceConfig(secretParamValue);
+					
+				//Validate the secrets exist etc.
+				if (!virtualInstanceConfig.isValid()) {
+					_log.info(virtualInstanceFolderName + ": Mandatory secrets not configured as expected.");
+
+					virtualInstanceErrorCount ++;
+					virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
+					
+					continue; // Skip to next folder
+				}
+				
+				CompanyThreadLocal.setCompanyId(company.getCompanyId());
+
+				if (_samlProviderConfigurationHelper.getSamlProviderConfiguration() == null || _samlProviderConfigurationHelper.getSamlProviderConfiguration().companyId() != company.getCompanyId()) {
+					_log.info(virtualInstanceFolderName + ": SAML SP Configuration missing.");
+
+					virtualInstanceErrorCount ++;
+					virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
 						
-						virtualInstanceErrorCount ++;
-						virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
+					continue; // Skip to next folder
+				}
+				
+				if (!_samlProviderConfigurationHelper.isRoleSp()) {
+					_log.info(virtualInstanceFolderName + ": Unexpected SAML Role.");
+
+					virtualInstanceErrorCount ++;
+					virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
+						
+					continue; // Skip to next folder
+				}
+				
+				spConfig = SamlRestoreToolUtil.parseSPConfig(samlAdminConfigurationProperties);
+
+				if (spConfig.hasEncryptionCert() && Validator.isNull(virtualInstanceConfig.getEncryptionCertificatePassword())) {
+					String encryptionCertificatePasswordEnvVar = SamlRestoreToolConstants.ENVIRONMENT_VARIABLES.SECRET.SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_PARAM.replaceAll("\\{0\\}", secretParamValue);
+						
+					_log.info(virtualInstanceFolderName + ": Secret " + encryptionCertificatePasswordEnvVar + " is missing.");
+
+					virtualInstanceErrorCount ++;
+					virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
+						
+					continue; // Skip to next folder
+				}				
+
+				for (int i = 1; i <= 10; i++) { // Assume no more than 10...
+					String dynamicPrefix = _idpPopertyPrefix(i);
+				
+					//Basic checks before loading fully and more detailed validation...
+					String idPName = samlAdminConfigurationProperties.getProperty(dynamicPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.CONNECTION_NAME);
+					String idPEntityId = samlAdminConfigurationProperties.getProperty(dynamicPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.SAML_IDP_ENTITY_ID);
+					String idPMetadataFile = samlAdminConfigurationProperties.getProperty(dynamicPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.IDP_METADATA_FILE);
+
+					if (Validator.isNotNull(idPName) || Validator.isNotNull(idPEntityId) || Validator.isNotNull(idPMetadataFile)) {
+						boolean metaDataFileExists = containsFile(folderFiles, idPMetadataFile);
+						
+						if (!metaDataFileExists) {
+							_log.info(virtualInstanceFolderName + ": IdP configuration " + _idpPopertyPrefix(i) + " metadata file " + idPMetadataFile + " not found.");
 							
-						continue; // Skip to next folder
-					}
-						
-					String webId = company.getWebId();
-						
-					VirtualInstanceSecretConfig virtualInstanceConfig = _getVirtualInstanceConfig(secretParamValue);
-						
-					//Validate the secrets exist etc.
-					if (!virtualInstanceConfig.isValid()) {
-						_log.info(virtualInstanceFolderName + ": Mandatory secrets not configured as expected.");
-
-						virtualInstanceErrorCount ++;
-						virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
-						
-						continue; // Skip to next folder
-					}
-					
-					CompanyThreadLocal.setCompanyId(company.getCompanyId());
-
-					if (_samlProviderConfigurationHelper.getSamlProviderConfiguration() == null || _samlProviderConfigurationHelper.getSamlProviderConfiguration().companyId() != company.getCompanyId()) {
-						_log.info(virtualInstanceFolderName + ": SAML SP Configuration missing.");
-
-						virtualInstanceErrorCount ++;
-						virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
+							invalidIdPCount ++;
 							
-						continue; // Skip to next folder
-					}
-					
-					if (!_samlProviderConfigurationHelper.isRoleSp()) {
-						_log.info(virtualInstanceFolderName + ": Unexpected SAML Role.");
-
-						virtualInstanceErrorCount ++;
-						virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
-							
-						continue; // Skip to next folder
-					}
-
-					for (int i = 1; i <= 10; i++) { // Assume no more than 10...
-						String dynamicPrefix = _idpPopertyPrefix(i);
-					
-						//Basic checks before loading fully and more detailed validation...
-						String idPName = samlAdminConfigurationProperties.getProperty(dynamicPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.CONNECTION_NAME);
-						String idPEntityId = samlAdminConfigurationProperties.getProperty(dynamicPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.SAML_IDP_ENTITY_ID);
-						String idPMetadataFile = samlAdminConfigurationProperties.getProperty(dynamicPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.IDP_METADATA_FILE);
-
-						if (Validator.isNotNull(idPName) || Validator.isNotNull(idPEntityId) || Validator.isNotNull(idPMetadataFile)) {
+							break;
+						} else {
 							IdPConfig idpConfig = SamlRestoreToolUtil.parseIdPConfig(dynamicPrefix, company.getCompanyId(), samlAdminConfigurationProperties);
-						
+							
 							//Basic Validation of this set of IdP properties
 							if (idpConfig.isValidBasic()) {
 								idPConfigs.add(idpConfig);
 							} else {
+								_log.info(virtualInstanceFolderName + ": IdP configuration " + _idpPopertyPrefix(i) + " is invalid / incomplete.");
+								
 								invalidIdPCount ++;
-							}
-						} else {
-							break;
+								
+								break;
+							}							
 						}
+					} else {
+						break;
 					}
-						
-					_log.info(virtualInstanceFolderName + ": IdP count is " + idPConfigs.size() + ".");
+				}
 					
-					if (idPConfigs.isEmpty()) {
-						_log.info(virtualInstanceFolderName + ": No IdP configurations in the properties file.");
+				_log.info(virtualInstanceFolderName + ": Valid IdP count is " + idPConfigs.size() + ".");
+				
+				if (idPConfigs.isEmpty()) {
+					_log.info(virtualInstanceFolderName + ": No Valid IdP configurations in the properties file.");
 
-						virtualInstanceErrorCount ++;
-						virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
-						
-						continue; // Skip to next folder
-					} else if (invalidIdPCount > 0) {
-						_log.info(virtualInstanceFolderName + ": One of more invalid or incomplete IdP configurations in the properties file.");
-
-						virtualInstanceErrorCount ++;
-						virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
-							
-						continue; // Skip to next folder
-					}
-
-					spConfig = SamlRestoreToolUtil.parseSPConfig(samlAdminConfigurationProperties);
-
-					if (spConfig.hasEncryptionCert() && Validator.isNull(virtualInstanceConfig.getEncryptionCertificatePassword())) {
-						String encryptionCertificatePassword = SamlRestoreToolConstants.ENVIRONMENT_VARIABLES.SECRET.SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_PARAM.replaceAll("\\{0\\}", webId);
-							
-						_log.info(virtualInstanceFolderName + ": Secret " + encryptionCertificatePassword + " missing.");
-
-						virtualInstanceErrorCount ++;
-						virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
-							
-						continue; // Skip to next folder
-					}
-
-					KeyStore virtualInstanceKeyStore = _replaceVirtualInstanceKeyStore(spConfig.hasEncryptionCert(), spConfig.getSamlSpEntityId(), instanceFolder, samlAdminConfigurationProperties, virtualInstanceConfig, virtualInstanceFolderName);
-
-					if (Validator.isNull(virtualInstanceKeyStore)) {
-						_log.error(virtualInstanceFolderName + ": An error occurred updating the KeyStore.");
-						
-						_configureSamlSpProperties(false, spConfig, null, virtualInstanceFolderName, true, false);
-
-						virtualInstanceErrorCount ++;
-						virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
-							
-						continue; // Skip to next folder
-					}
-
-					// Disabled temporarily while the Idp Connection is deleted and recreated...
-					_configureSamlSpProperties(false, spConfig, virtualInstanceConfig, virtualInstanceFolderName, false, true);
-					
-					_deleteSpIdpConnections(company.getCompanyId(), virtualInstanceFolderName);
-					
-					long idpConfigCount = idPConfigs.size();
-					long idpCreateSuccessCount = 0;
-					
-					for (IdPConfig idpConfig: idPConfigs) {
-						boolean idpCreateSuccess = _createSamlSpIdpConnection(idpConfig, instanceFolder, virtualInstanceFolderName);
-						
-						if (idpCreateSuccess) idpCreateSuccessCount ++;
-					}
-					
-					if (idpCreateSuccessCount != idpConfigCount) {
-						_log.error(virtualInstanceFolderName + ": An error occurred recreating one of more IdP Connections.");
-						
-						_configureSamlSpProperties(false, spConfig, null, virtualInstanceFolderName, true, false);
-
-						virtualInstanceErrorCount ++;
-						virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
-							
-						continue;							
-					}
-					
-					_configureSamlSpProperties(spConfig.isSamlEnabled(), spConfig, virtualInstanceConfig, virtualInstanceFolderName, false, false);
-
-					_log.info(virtualInstanceFolderName + ": Finished processing SAML configuration for SP Entity ID " + spConfig.getSamlSpEntityId() + ".");
-						
-					virtualInstancesSAMLRestored.add(virtualInstanceFolderName);
-				} catch (Exception e) {
-					virtualInstanceErrorCount++;
+					virtualInstanceErrorCount ++;
 					virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
 					
-					_log.error(e.getClass() + ": " + e.getMessage());
+					continue; // Skip to next folder
+				} else if (invalidIdPCount > 0) {
+					_log.info(virtualInstanceFolderName + ": One of more invalid or incomplete IdP configurations in the properties file.");
 
-					try {
-						if (Validator.isNotNull(spConfig)) { // Deactivate SAML if we know an error occurred during processing..
-							_configureSamlSpProperties(false, spConfig, null, virtualInstanceFolderName, true, false);
-						}
-					} catch (Exception ex) {
-						_log.error(virtualInstanceFolderName + ": Error trying to disable SAML Configuration for SP Entity ID " + spConfig.getSamlSpEntityId() + ".");
-						_log.error(ex.getClass() + ": " + ex.getMessage());
-					}
-					
-					continue;
+					virtualInstanceErrorCount ++;
+					virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
+						
+					continue; // Skip to next folder
 				}
+
+				KeyStore virtualInstanceKeyStore = _replaceVirtualInstanceKeyStore(spConfig.hasEncryptionCert(), spConfig.getSamlSpEntityId(), instanceFolder, restorableKeyStoreFileName, virtualInstanceConfig, virtualInstanceFolderName);
+
+				if (Validator.isNull(virtualInstanceKeyStore)) {
+					_log.error(virtualInstanceFolderName + ": An error occurred updating the KeyStore.");
+					
+					_configureSamlSpProperties(false, spConfig, null, virtualInstanceFolderName, true, false);
+
+					virtualInstanceErrorCount ++;
+					virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
+						
+					continue; // Skip to next folder
+				}
+
+				// Disabled temporarily while the Idp Connection is deleted and recreated...
+				_configureSamlSpProperties(false, spConfig, virtualInstanceConfig, virtualInstanceFolderName, false, true);
+				
+				_deleteSpIdpConnections(company.getCompanyId(), virtualInstanceFolderName);
+				
+				long idpConfigCount = idPConfigs.size();
+				long idpCreateSuccessCount = 0;
+				
+				for (IdPConfig idpConfig: idPConfigs) {
+					boolean idpCreateSuccess = _createSamlSpIdpConnection(idpConfig, instanceFolder, virtualInstanceFolderName);
+					
+					if (idpCreateSuccess) idpCreateSuccessCount ++;
+				}
+				
+				if (idpCreateSuccessCount != idpConfigCount) {
+					_log.error(virtualInstanceFolderName + ": An error occurred recreating one of more IdP Connections.");
+					
+					_configureSamlSpProperties(false, spConfig, null, virtualInstanceFolderName, true, false);
+
+					virtualInstanceErrorCount ++;
+					virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
+						
+					continue;							
+				}
+				
+				_configureSamlSpProperties(spConfig.isSamlEnabled(), spConfig, virtualInstanceConfig, virtualInstanceFolderName, false, false);
+
+				_log.info(virtualInstanceFolderName + ": Finished processing SAML configuration for SP Entity ID " + spConfig.getSamlSpEntityId() + ".");
+					
+				virtualInstancesSAMLRestored.add(virtualInstanceFolderName);
+			} catch (Exception e) {
+				virtualInstanceErrorCount++;
+				virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
+				
+				_log.error(e.getClass() + ": " + e.getMessage());
+
+				try {
+					if (Validator.isNotNull(spConfig)) { // Deactivate SAML if we know an error occurred during processing..
+						_configureSamlSpProperties(false, spConfig, null, virtualInstanceFolderName, true, false);
+					}
+				} catch (Exception ex) {
+					_log.error(virtualInstanceFolderName + ": Error trying to disable SAML Configuration for SP Entity ID " + spConfig.getSamlSpEntityId() + ".");
+					_log.error(ex.getClass() + ": " + ex.getMessage());
+				}
+				
+				continue;
 			}
 		}
 		
@@ -359,6 +410,12 @@ public class SamlRestoreToolServiceImpl {
 	
 	private String _idpPopertyPrefix(long pos) {
 		return "idp" + pos + ".";
+	}
+	
+	private boolean containsFile(File[] folderFiles, String fileName) {
+		if (folderFiles == null) return false;
+		
+		return Arrays.stream(folderFiles).anyMatch(file -> fileName.equals(file.getName()));
 	}
 	
 	private boolean _createSamlSpIdpConnection(
@@ -459,13 +516,12 @@ public class SamlRestoreToolServiceImpl {
 	}
 
 	private KeyStore _replaceVirtualInstanceKeyStore(
-		boolean hasEncryptionCert, String samlSpEntityId, File instanceFolder,
-		Properties properties, VirtualInstanceSecretConfig virtualInstanceConfig, String virtualInstanceFolderName) {
+		boolean hasEncryptionCert, String samlSpEntityId, File instanceFolder, String restorableKeyStoreFileName,
+		VirtualInstanceSecretConfig virtualInstanceConfig, String virtualInstanceFolderName) {
 
 		KeyStore restorableKeyStore = null;
 		InputStream restorableKeyStoreInputStream = null;
 		
-		String restorableKeyStoreFileName = properties.getProperty(SamlRestoreToolConstants.PROPERTIES.SP.KEY_STORE_FILE);
 		String restorableKeyStoreType = FileUtil.getExtension(restorableKeyStoreFileName);
 		String restorableKeyStoreFilePath = StringBundler.concat(instanceFolder, StringPool.FORWARD_SLASH, restorableKeyStoreFileName);
 
