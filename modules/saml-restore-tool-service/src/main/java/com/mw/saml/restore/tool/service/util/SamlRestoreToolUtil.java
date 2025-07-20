@@ -118,35 +118,40 @@ public class SamlRestoreToolUtil {
 	
 	public static boolean isValidBasic(String idpPrefix, Properties properties) {
 		
-		// General
-		String virtualHost = properties.getProperty(SamlRestoreToolConstants.COMPANY_VIRTUAL_HOST);
+		// Mapping
+		String virtualHost = properties.getProperty(SamlRestoreToolConstants.PROPERTIES.MAPPING.COMPANY_VIRTUAL_HOST);
 		
 		if (Validator.isNull(virtualHost)) return false;
+		
+		// Mapping
+		String secretParam = properties.getProperty(SamlRestoreToolConstants.PROPERTIES.MAPPING.SECRET_PARAM);
+		
+		if (!isValidSecretParam(secretParam)) return false;
 
 		//SP
-		String samlSpEntityId = properties.getProperty(SamlRestoreToolConstants.SP.SAML_SP_ENTITY_ID);
+		String samlSpEntityId = properties.getProperty(SamlRestoreToolConstants.PROPERTIES.SP.SAML_SP_ENTITY_ID);
 		
 		if (Validator.isNull(samlSpEntityId)) return false;
 		
 		//KeyStore
-		String keyStoreFileName = properties.getProperty(SamlRestoreToolConstants.KEY_STORE_FILE);
+		String keyStoreFileName = properties.getProperty(SamlRestoreToolConstants.PROPERTIES.SP.KEY_STORE_FILE);
 		
 		if (Validator.isNull(keyStoreFileName)) return false;
 		
 		//IDP
-		String idpName = properties.getProperty(idpPrefix + SamlRestoreToolConstants.IDP.CONNECTION_NAME);
+		String idpName = properties.getProperty(idpPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.CONNECTION_NAME);
 		
 		if (Validator.isNull(idpName)) return false;
 		
-		String idpMetadataXmlFile = properties.getProperty(idpPrefix + SamlRestoreToolConstants.IDP.IDP_METADATA_FILE);
+		String idpMetadataXmlFile = properties.getProperty(idpPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.IDP_METADATA_FILE);
 		
 		if (Validator.isNull(idpMetadataXmlFile)) return false;
 		
-		String idpSamlIdpEntityId = properties.getProperty(idpPrefix + SamlRestoreToolConstants.IDP.SAML_IDP_ENTITY_ID);
+		String idpSamlIdpEntityId = properties.getProperty(idpPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.SAML_IDP_ENTITY_ID);
 		
 		if (Validator.isNull(idpSamlIdpEntityId)) return false;
 
-		String idpUserAttributeMappings = properties.getProperty(idpPrefix + SamlRestoreToolConstants.IDP.USER_ATTRIBUTE_MAPPINGS);
+		String idpUserAttributeMappings = properties.getProperty(idpPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.USER_ATTRIBUTE_MAPPINGS);
 		
 		if (Validator.isNull(idpUserAttributeMappings)) return false;
 		
@@ -157,19 +162,19 @@ public class SamlRestoreToolUtil {
 			parseIdPConfig(String idpPrefix, long companyId, Properties properties)
 		throws NumberFormatException, PortalException {
 
-		boolean assertionSignatureRequired = GetterUtil.get(idpPrefix + properties.getProperty(SamlRestoreToolConstants.IDP.ASSERTION_SIGNATURE_REQUIRED), false);
-		long clockSkew = GetterUtil.get(properties.getProperty(idpPrefix + SamlRestoreToolConstants.IDP.CLOCK_SKEW), SamlRestoreToolConstants.SHARED.DEFAULT_CLOCK_SKEW_VALUE);
-		boolean enabled = GetterUtil.get(properties.getProperty(idpPrefix + SamlRestoreToolConstants.IDP.CONNECTION_ENABLED), false);
-		boolean forceAuthn = GetterUtil.get(properties.getProperty(idpPrefix + SamlRestoreToolConstants.IDP.FORCE_AUTHN), false);
-		boolean ldapImportEnabled = GetterUtil.get(properties.getProperty(idpPrefix + SamlRestoreToolConstants.IDP.LDAP_IMPORT_ENABLE), false);
-		String metadataXmlFile = properties.getProperty(idpPrefix + SamlRestoreToolConstants.IDP.IDP_METADATA_FILE);
-		String name = properties.getProperty(idpPrefix + SamlRestoreToolConstants.IDP.CONNECTION_NAME);
-		String samlIdpEntityId = properties.getProperty(idpPrefix + SamlRestoreToolConstants.IDP.SAML_IDP_ENTITY_ID);
-		String nameIdFormat = properties.getProperty(idpPrefix + SamlRestoreToolConstants.IDP.NAME_ID_FORMAT);
-		boolean signAuthnRequest = GetterUtil.get(idpPrefix + properties.getProperty(SamlRestoreToolConstants.IDP.SIGN_AUTHN_REQUEST), false);
-		String userAttributeMappings = properties.getProperty(idpPrefix + SamlRestoreToolConstants.IDP.USER_ATTRIBUTE_MAPPINGS);
-		boolean unknownUsersAreStrangers = GetterUtil.get(idpPrefix + properties.getProperty(SamlRestoreToolConstants.IDP.UNKNOWN_USERS_ARE_STRANGERS), false);
-		String userIdentifierExpression = properties.getProperty(idpPrefix + SamlRestoreToolConstants.IDP.USER_IDENTIFIER_EXPRESSION);		
+		boolean assertionSignatureRequired = GetterUtil.get(idpPrefix + properties.getProperty(SamlRestoreToolConstants.PROPERTIES.IDP.ASSERTION_SIGNATURE_REQUIRED), false);
+		long clockSkew = GetterUtil.get(properties.getProperty(idpPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.CLOCK_SKEW), SamlRestoreToolConstants.PROPERTIES.SHARED.DEFAULT_CLOCK_SKEW_VALUE);
+		boolean enabled = GetterUtil.get(properties.getProperty(idpPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.CONNECTION_ENABLED), false);
+		boolean forceAuthn = GetterUtil.get(properties.getProperty(idpPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.FORCE_AUTHN), false);
+		boolean ldapImportEnabled = GetterUtil.get(properties.getProperty(idpPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.LDAP_IMPORT_ENABLE), false);
+		String metadataXmlFile = properties.getProperty(idpPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.IDP_METADATA_FILE);
+		String name = properties.getProperty(idpPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.CONNECTION_NAME);
+		String samlIdpEntityId = properties.getProperty(idpPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.SAML_IDP_ENTITY_ID);
+		String nameIdFormat = properties.getProperty(idpPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.NAME_ID_FORMAT);
+		boolean signAuthnRequest = GetterUtil.get(idpPrefix + properties.getProperty(SamlRestoreToolConstants.PROPERTIES.IDP.SIGN_AUTHN_REQUEST), false);
+		String userAttributeMappings = properties.getProperty(idpPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.USER_ATTRIBUTE_MAPPINGS);
+		boolean unknownUsersAreStrangers = GetterUtil.get(idpPrefix + properties.getProperty(SamlRestoreToolConstants.PROPERTIES.IDP.UNKNOWN_USERS_ARE_STRANGERS), false);
+		String userIdentifierExpression = properties.getProperty(idpPrefix + SamlRestoreToolConstants.PROPERTIES.IDP.USER_IDENTIFIER_EXPRESSION);		
 
 		return new IdPConfig(
 			companyId, assertionSignatureRequired, clockSkew,
@@ -181,21 +186,44 @@ public class SamlRestoreToolUtil {
 		Properties properties) {
 
 		boolean requireAssertionSignature = GetterUtil.get(properties.getProperty(PortletPropsKeys.SAML_SP_ASSERTION_SIGNATURE_REQUIRED), false);
-		long clockSkew = GetterUtil.get(properties.getProperty(PortletPropsKeys.SAML_SP_CLOCK_SKEW), SamlRestoreToolConstants.SHARED.DEFAULT_CLOCK_SKEW_VALUE);
+		long clockSkew = GetterUtil.get(properties.getProperty(PortletPropsKeys.SAML_SP_CLOCK_SKEW), SamlRestoreToolConstants.PROPERTIES.SHARED.DEFAULT_CLOCK_SKEW_VALUE);
 		boolean ldapImportEnabled = GetterUtil.get(properties.getProperty(PortletPropsKeys.SAML_SP_LDAP_IMPORT_ENABLED), false);
 		boolean signAuthnRequests = GetterUtil.get(properties.getProperty(PortletPropsKeys.SAML_SP_SIGN_AUTHN_REQUEST), false);
 		boolean signMetadata = GetterUtil.get(properties.getProperty(PortletPropsKeys.SAML_SIGN_METADATA), false);
 		boolean sslRequired = GetterUtil.get(properties.getProperty(PortletPropsKeys.SAML_SSL_REQUIRED), false);
 		boolean allowShowingLoginPortlet = GetterUtil.get(properties.getProperty(PortletPropsKeys.SAML_SP_ALLOW_SHOWING_THE_LOGIN_PORTLET), false);
-		boolean hasEncryptionCert = GetterUtil.get(properties.getProperty(SamlRestoreToolConstants.SP.HAS_ENCRYPTION_CERT), true);
-		boolean samlEnabled = GetterUtil.get(properties.getProperty(SamlRestoreToolConstants.SP.SAML_ENABLED), false);
-		String samlSpEntityId = properties.getProperty(SamlRestoreToolConstants.SP.SAML_SP_ENTITY_ID);
+		boolean hasEncryptionCert = GetterUtil.get(properties.getProperty(SamlRestoreToolConstants.PROPERTIES.SP.HAS_ENCRYPTION_CERT), true);
+		boolean samlEnabled = GetterUtil.get(properties.getProperty(SamlRestoreToolConstants.PROPERTIES.SP.SAML_ENABLED), false);
+		String samlSpEntityId = properties.getProperty(SamlRestoreToolConstants.PROPERTIES.SP.SAML_SP_ENTITY_ID);
 
 		return new SPConfig(
 			requireAssertionSignature, clockSkew, ldapImportEnabled,
 			signAuthnRequests, signMetadata, sslRequired,
 			allowShowingLoginPortlet, hasEncryptionCert, samlEnabled,
 			samlSpEntityId);
+	}
+	
+	private static boolean isValidSecretParam(String key) {
+        if (Validator.isNull(key)) {
+            return false;
+        }
+
+        // Only uppercase letters and underscores allowed
+        if (!key.matches("[A-Z_]+")) {
+            return false;
+        }
+
+        // Must not start or end with an underscore
+        if (key.startsWith("_") || key.endsWith("_")) {
+            return false;
+        }
+
+        // Must not contain double underscores
+        if (key.contains("__")) {
+            return false;
+        }
+
+        return true;		
 	}
 	
 	private static final Log _log = LogFactoryUtil.getLog(SamlRestoreToolUtil.class);
