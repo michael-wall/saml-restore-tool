@@ -66,8 +66,8 @@
 
 ## Steps to setup the restorable KeyStore ##
 - Use these steps to export the existing non-prod environment KeyStore for the Virtual Instance, so that the contents of the KeyStore can then be imported after the Backup and Restore has completed.
-- Find the non-prod environment KeyStore in the environments Liferay service file system.
-- With the 'Document Library Keystore Manager' it will be available in the Liferay service shell within the following folder: /opt/liferay/data/document_library/[COMPANY_ID]/0/saml/keystore.jks (where [COMPANY_ID] is the companyId for the relevant Virtual Instance).
+- Find the non-prod environment KeyStore in the environments Liferay service file system. With the 'Document Library Keystore Manager' it will be available in the Liferay service shell within the following folder: /opt/liferay/data/document_library/[COMPANY_ID]/0/saml/keystore.jks
+  - Where [COMPANY_ID] is the companyId for the relevant Virtual Instance.
   - For the Advanced File System Store the KeyStore filename within the 'keystore.jks' folder is 'keystore_1.0.jks'
   - For the Simple File Store the KeyStore filename within the 'keystore.jks' folder is '1.0'
 - Download a Liferay PaaS Document Library Backup to extract the KeyStore OR use the LCP CLI Tool to download the KeyStore file after copying it to the persistent-storage location first.
