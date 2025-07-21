@@ -11,9 +11,11 @@
 - The following steps need to be completed once per non-prod environment (and then maintained for future SAML Admin configuration changes). The configuration files and restorable KeyStore become part of the Liferay PaaS build for the non-prod environment, so they won't get overwritten by a Backup being Restored from another environment into the non-prod environment.
 - Create the following folder structure within the Liferay Service folder of the DXP Cloud Workspace:
   - configs/[ENV]/saml-restore-tool-config/virtual-instances
-    - where [ENV] is a Liferay PaaS non-prod environment e.g. uat. **Do NOT create for prod or common...**
+    - where [ENV] is a Liferay PaaS non-prod environment e.g. dev or uat. **Do NOT create for prod or common...**
     - The DXP Cloud Workspace folder liferay/configs/[ENV]/saml-restore-tool-config/virtual-instances translates to /opt/liferay/saml-restore-tool-config/virtual-instances in the Liferay service shell.
-- Within the virtual-instances folder, create a subfolder for each SAML enabled Virtual Instance, using the Virtual Instance Web ID e.g. configs/[ENV]/saml-restore-tool-config/virtual-instances/liferay.com
+- Within the virtual-instances folder, create a subfolder for each SAML enabled Virtual Instance, using the Virtual Instance Web ID e.g. dev environment with Web IDs of liferay.com and mw.com would have:
+  - configs/dev/saml-restore-tool-config/virtual-instances/liferay.com
+  - configs/dev/saml-restore-tool-config/virtual-instances/mw.com
 - Inside each Virtual Instance Web ID folder add the following files:
 1. saml-admin-configuration.properties: A properties file containing the SAML Admin values to restore for this Virtual Instance. Start with the saml-restore-tool-config\saml-admin-configuration_TEMPLATE.properties file (from the repository), rename the file and update the values based on the table in the **saml-admin-configuration.properties** section. A sample file (saml-admin-configuration_SAMPLE.properties) is also included for reference.
 2. The SAML IdP Metadata XML file(s) e.g. idp-metadata-file.xml, using the same name as the corresponding *.idp.metadata.file property value in saml-admin-configuration.properties.
