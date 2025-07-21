@@ -1,15 +1,15 @@
 ## Introduction ##
-- We encourage customers to backup and restore prod data to non-prod enviornments regularly, however:
+- The SAML Restore Tool can be used to programatically restore a SAML configuration for Liferay as SAML Service Provider (SP) in a non-prod environment for example after a Liferay PaaS Backup from another environment is restored into that non-prod environment.
+- We encourage customers to backup and restore prod data to non-prod environments regularly, however:
   - Liferay DXP stores SAML Admin configuration (General, Service Provider and Identity Provider Connections) in it's database.
-  - Liferay DXP stores the SAML Admin Certificate and Private Key and Encryption Certificate and Private Key in either the Document Library or within the File System.
-  - When a Liferay PaaS Backup is restored from for example prod to uat, the uat database is overwritten, including the SAML Admin configuration and the Keystore mappings etc.
-- The SAML Restore Tool programatically restores a SAML configuration for Liferay as SAML Service Provider (SP) into a non-prod environment for example after a Liferay PaaS Backup from another environment is restored into that non-prod environment.
-- The SAML Restore Tool is intended for use in Liferay PaaS but it can also be used outside of Liferay PaaS if the correct setup is in place in the environment.
-- Having the option of restoring the previous SAML Configuration:
+  - Liferay DXP stores the SAML Admin > Certificate and Private Key and Encryption Certificate and Private Key in either the Document Library or within the File System.
+  - When a Liferay PaaS Backup is restored from for example prod to uat, the uat database is overwritten, including the SAML Admin configuration and the KeyStore mappings etc.
+- The SAML Restore Tool address all of these scenarios. Having the option of restoring the previous SAML Configuration:
   - Ensures that the SAML SP Metadata XML doesn't change, meaning it doesn’t need to be reshared with the IdP team.
   - Allows prod and non-prod environments to use a separate SAML IdP if required.
   - Follows security good practice of prod and non-prod environments using separate Certificates and Private Keys etc.
   - Speeds up the Restore process by automating time consuming complex manual steps.
+- The SAML Restore Tool is primarialy intended for use in Liferay PaaS but it can also be used outside of Liferay PaaS if the correct setup is in place in the environment.
 
 ## Non-prod Liferay PaaS Environment Setup ##
 - The following steps need to be completed once per non-prod environment (and then maintained for future SAML Admin configuration changes). The configuration files and restorable KeyStore become part of the Liferay PaaS build for the non-prod environment, so they won't get overwritten by a Backup being Restored from another environment into the non-prod environment.
@@ -153,10 +153,11 @@ Sample Liferay service LCP.com extract for the uat environment with a single Vir
 - Ensure the 'Certificate and Private Key' and 'Encryption Certificate and Private Key' in the Virtual Instance specific restorable KeyStore are updated when they are updated in SAML Admin > General screen e.g. after renewal etc.
 - Ensure stored SAML Identity Provider Metadata XML file(s) are updated if the files change e.g. due to Certificate renewal or other setup change etc.
 
-## Why not use SAML-Admin headless REST APIs? ##
+## Why not use Client Extensions and SAML-Admin headless REST APIs? ##
 - Liferay exposes some endpoints under SAML-Admin e.g. POST /v1.0/saml-provider with the description 'Creates a full SAML Provider configuration with peer connections.'.
-- However the development of these SAML Admin endpoints was paused a few years ago, so this is a partially completed BETA feature, that does not currently handle the setup of the SAML Certificates and Private Keys.
+- However the development of these SAML Admin endpoints was paused a few years ago, so this is a partially completed BETA feature that does not currently handle the setup of the SAML Certificates and Private Keys.
 - As such it is not a viable implementation approach for this use case.
+- As a result a Client Extension based solution is not feasible at this point in time.
  
 ## Assumptions ##
 - SAML is already configured in the non-prod environment.
@@ -164,6 +165,7 @@ Sample Liferay service LCP.com extract for the uat environment with a single Vir
 - 'Certificate and Private Key' is always mandatory, but 'Encryption Certificate and Private Key' is optional.
 
 ## Known Limitations ##
+- The SAML Restore Tool is a custom OSGi module, so it is not compatible with Liferay SaaS.
 - The SAML Restore Tool is designed for the use case of Liferay DXP acting as a SAML Service Provider (SP). The SAML Restore Tool is not intended for use in an environment where Liferay DXP is acting as a SAML Identity Provider (IdP).
 - **ALL environments** (prod and non-prod) must already be using the Document Library Keystore Manager:
   - This can be checked in Control Panel > System Settings > Security > SSO > SAML KeyStoreManager Implementation Configuration > Keystore Manager Target. Ensure that Document Library Keystore Manager is in use. If not set then is is using the Filesystem Keystore Manager.
