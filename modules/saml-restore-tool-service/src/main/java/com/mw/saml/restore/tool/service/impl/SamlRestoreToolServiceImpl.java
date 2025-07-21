@@ -569,9 +569,9 @@ public class SamlRestoreToolServiceImpl {
 		boolean signingCertificateVerified = _verifySigningCertificate(samlSpEntityId, virtualInstanceConfig, tempKeyStore);
 		
 		if (signingCertificateVerified) {
-			_log.info(virtualInstanceFolderName + ": The (Signing) Certificate and Private Key have been successfully verified for SP Entity ID " + samlSpEntityId + ".");
+			_log.info(virtualInstanceFolderName + ": The Certificate and Private Key have been successfully verified for SP Entity ID " + samlSpEntityId + ".");
 		} else {
-			_log.info(virtualInstanceFolderName + ": The (Signing) Certificate and Private Key have NOT been verified for SP Entity ID " + samlSpEntityId + ".");
+			_log.info(virtualInstanceFolderName + ": The Certificate and Private Key have NOT been verified for SP Entity ID " + samlSpEntityId + ".");
 			
 			return null;
 		}
@@ -590,7 +590,6 @@ public class SamlRestoreToolServiceImpl {
 		}
 
 		return restorableKeyStore;
-
 	}
 
 	private boolean _verifyEncryptionCertificate(String samlSpEntityId, VirtualInstanceSecretConfig virtualInstanceConfig, KeyStore newKeyStore) {
