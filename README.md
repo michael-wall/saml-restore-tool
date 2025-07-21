@@ -145,6 +145,9 @@ Sample Liferay service LCP.com extract for the uat environment with a single Vir
 
 ## Using the SAML Restore Tool outside of Liferay PaaS ##
 - The SAML Restore Tool can be used outside of Liferay PaaS as long as the environment variables and configuration files are setup for the environment with the correct paths etc.
+  - Set the Environment Variables in the Liferay enviornment
+  - Create the folder structure in the Liferay environment
+    - The SAML_RESTORE_TOOL_CONFIG_PATH path is relative to Liferay home, so '/saml-restore-tool-config/virtual-instances' is valid if this folder exists within the Liferay home folder.
 
 ## Future SAML Admin Changes after SAML Restore Tool Setup ##
 - Any changes to the SAML Admin configuration should be applied in the configs/[ENV]/data/saml-restore-tool-config/virtual-instances/ setup and / or the secrets if applicable.
