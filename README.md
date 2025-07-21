@@ -154,10 +154,9 @@ Sample Liferay service LCP.com extract for the uat environment with a single Vir
 - Ensure stored SAML Identity Provider Metadata XML file(s) are updated if the files change e.g. due to Certificate renewal or other setup change etc.
 
 ## Why not use Client Extensions and SAML-Admin headless REST APIs? ##
-- Liferay exposes some endpoints under SAML-Admin e.g. POST /v1.0/saml-provider with the description 'Creates a full SAML Provider configuration with peer connections.'.
+- Liferay exposes some headless REST endpoints under SAML-Admin e.g. POST /v1.0/saml-provider with the description 'Creates a full SAML Provider configuration with peer connections.'.
 - However the development of these SAML Admin endpoints was paused a few years ago, so this is a partially completed BETA feature that does not currently handle the setup of the SAML Certificates and Private Keys.
-- As such it is not a viable implementation approach for this use case.
-- As a result a Client Extension based solution is not feasible at this point in time.
+- As such it is not a viable implementation approach for this use case and as a result, a Client Extension based solution is not feasible at this point in time.
  
 ## Assumptions ##
 - SAML is already configured in the non-prod environment.
