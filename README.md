@@ -183,9 +183,7 @@ Sample Liferay service LCP.com extract for the uat environment with a single Vir
 - If the SAML Restore Tool doesn't succeed in updating a specific SAML Configuration it will attempt to set it as inactive.
 - The Liferay service must be running for the Gogo Shell to be available.
 - The SAML Restore Tool can be run before an Elasticsearch reindex has been triggered following a backup restore to the environment.
-- It is good practice to have a hidden public page (with Guest view access) containing the 'Sign In' widget, and a non-SSO enabled Administrator user account to get back into an SSO enabled system when the SSO is not working.
-  - The non-SSO enabled account(s) should be secured with a secure Password Policy and with Multi-Factor Authentication (MFA).
-- Since the Virtual Instance specific restorable KeyStore(s) are accessible to anyone with access to the DXP Cloud repository, the steps include changing the KeyStore password to keep the KeyStore secure.
+- Since the Virtual Instance specific restorable KeyStore is accessible to anyone with access to the DXP Cloud repository, the steps include changing the KeyStore password to keep the KeyStore secure.
 
 ## Reference ##
 - https://keystore-explorer.org/
