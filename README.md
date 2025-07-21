@@ -150,7 +150,7 @@ Sample Liferay service LCP.com extract for the uat environment with a single Vir
 
 ## Future SAML Admin Changes after SAML Restore Tool Setup ##
 - Any changes to the SAML Admin configuration should be applied in the configs/[ENV]/data/saml-restore-tool-config/virtual-instances/ setup and / or the secrets if applicable.
-- Ensure the (Signing) Certificate and Private Key and Encryption Certificate and Private Key in the Virtual Instance specific restorable KeyStore are updated when they are updated in SAML Admin > General screen e.g. after renewal.
+- Ensure the 'Certificate and Private Key' and 'Encryption Certificate and Private Key' in the Virtual Instance specific restorable KeyStore are updated when they are updated in SAML Admin > General screen e.g. after renewal etc.
 - Ensure stored SAML Identity Provider Metadata XML file(s) are updated if the files change e.g. due to Certificate renewal or other setup change etc.
 
 ## Why not use SAML-Admin headless REST APIs? ##
@@ -161,7 +161,7 @@ Sample Liferay service LCP.com extract for the uat environment with a single Vir
 ## Assumptions ##
 - SAML is already configured in the non-prod environment.
 - SAML is configured using Control Panel > Security > SAML Admin.
-- The code assumes that the (Signing) Certificate and Private Key are mandatory, but that the Encryption Certificate and Private Key are optional.
+- 'Certificate and Private Key' is always mandatory, but 'Encryption Certificate and Private Key' is optional.
 
 ## Known Limitations ##
 - The SAML Restore Tool is designed for the use case of Liferay DXP acting as a SAML Service Provider (SP). The SAML Restore Tool is not intended for use in an environment where Liferay DXP is acting as a SAML Identity Provider (IdP).
