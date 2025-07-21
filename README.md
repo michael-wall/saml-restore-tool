@@ -133,7 +133,7 @@ Sample Liferay service LCP.com extract for the uat environment with a single Vir
 [SamlRestoreToolServiceImpl:...] liferay.com: IdP count is 2.
 [SamlRestoreToolServiceImpl:...] liferay.com: The restorable SAML KeyStore has been successfully loaded for SP Entity ID mw-sp.
 [SamlRestoreToolServiceImpl:...] liferay.com: The SAML KeyStore has been successfully updated for SP Entity ID mw-sp.
-[SamlRestoreToolServiceImpl:...] liferay.com: The (Signing) Certificate and Private Key have been successfully verified for SP Entity ID mw-sp.
+[SamlRestoreToolServiceImpl:...] liferay.com: The Certificate and Private Key have been successfully verified for SP Entity ID mw-sp.
 [SamlRestoreToolServiceImpl:...] liferay.com: The Encryption Certificate and Private Key have been successfully verified for SP Entity ID mw-sp.
 [SamlRestoreToolServiceImpl:...] liferay.com: A new SAML IdP Connection Keycloak IdP 1 for IdP Entity ID http://localhost:8088/realms/mw has been successfully created.
 [SamlRestoreToolServiceImpl:...] liferay.com: A new SAML IdP Connection Keycloak IdP 2 for IdP Entity ID http://mw.com:8088/realms/mw has been successfully created.
