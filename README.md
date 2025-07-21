@@ -13,12 +13,12 @@
   - configs/[ENV]/saml-restore-tool-config/virtual-instances
     - where [ENV] is a Liferay PaaS non-prod environment e.g. uat. **Do NOT create for prod or common...**
     - The DXP Cloud Workspace folder liferay/configs/[ENV]/saml-restore-tool-config/virtual-instances translates to /opt/liferay/saml-restore-tool-config/virtual-instances in the Liferay service shell.
-  - Within the virtual-instances folder, create a subfolder for each SAML enabled Virtual Instance, using the case sensitive Virtual Instance Web ID e.g. configs/[ENV]/saml-restore-tool-config/virtual-instances/liferay.com
-  - Inside each Virtual Instance Web ID folder add the following files:
-    1. saml-admin-configuration.properties: A properties file containing the SAML Admin values to restore for this Virtual Instance. Start with the saml-restore-tool-config\saml-admin-configuration_TEMPLATE.properties file (from the repository), rename the file and update the values based on the table in the **saml-admin-configuration.properties** section. A sample file (saml-admin-configuration_SAMPLE.properties) is also included for reference.
-  - 2. The SAML IdP Metadata XML file(s) e.g. idp-metadata-file.xml, using the same name as the corresponding *.idp.metadata.file property value in saml-admin-configuration.properties.
-    - There should be one Metadata XML file per SAML Identify Provider defined in SAML Admin > Identity Provider Connections
-  - 3. The KeyStore where the restorable Certificate and Private Key and optionally the Encryption Certificate and Private Key are stored, using the same name as the key.store.file property value in saml-admin-configuration.properties. See **Steps to setup the restorable KeyStore** section for steps to setup this KeyStore.
+- Within the virtual-instances folder, create a subfolder for each SAML enabled Virtual Instance, using the Virtual Instance Web ID e.g. configs/[ENV]/saml-restore-tool-config/virtual-instances/liferay.com
+- Inside each Virtual Instance Web ID folder add the following files:
+1. saml-admin-configuration.properties: A properties file containing the SAML Admin values to restore for this Virtual Instance. Start with the saml-restore-tool-config\saml-admin-configuration_TEMPLATE.properties file (from the repository), rename the file and update the values based on the table in the **saml-admin-configuration.properties** section. A sample file (saml-admin-configuration_SAMPLE.properties) is also included for reference.
+2. The SAML IdP Metadata XML file(s) e.g. idp-metadata-file.xml, using the same name as the corresponding *.idp.metadata.file property value in saml-admin-configuration.properties.
+      - There should be one Metadata XML file per SAML Identify Provider defined in SAML Admin > Identity Provider Connections
+3. The KeyStore where the restorable Certificate and Private Key and optionally the Encryption Certificate and Private Key are stored, using the same name as the key.store.file property value in saml-admin-configuration.properties. See **Steps to setup the restorable KeyStore** section for steps to setup this KeyStore.
 - Add the Environment Variables to the environments Liferay Service - see **Steps to setup the Environment Variables** section.
 - Add the saml-restore-tool-service OSGi module source code to the DXP Cloud Workspace (within Liferay service modules folder) and confirm that the module successfully builds locally.
 - Add the changes to the GIT repository, allow the Liferay PaaS INFRA environment CI service to generate a new Liferay PaaS build, then deploy that build in the non-prod Liferay PaaS environment.
