@@ -1,14 +1,10 @@
 ## Introduction ##
 - The SAML Restore Tool is a configuration driven custom Gogo Shell command that can be used to restore a non-prod environments SAML Configuration e.g. after a prod backup is restored into the environment.
-- We encourage customers to backup and restore prod data to non-prod environments regularly, however:
-  - Liferay DXP stores SAML Admin configuration (General, Service Provider and Identity Provider Connections) in it's database.
-  - Liferay DXP stores the SAML Admin > Certificate and Private Key and Encryption Certificate and Private Key in either the Document Library or within the File System.
-  - When a Liferay PaaS Backup is restored from for example prod to uat, the uat database is overwritten, including the SAML Admin configuration and the KeyStore mappings etc.
-- The SAML Restore Tool address all of these scenarios. Having the ability to restore the previous SAML Configuration:
-  - Ensures that the SAML SP Metadata XML doesn't change, meaning it doesn’t need to be reshared with the IdP team.
-  - Allows prod and non-prod environments to use a separate SAML IdP if required.
-  - Follows security good practice of prod and non-prod environments using separate Certificates and Private Keys etc.
-  - Speeds up the Restore process by automating time consuming complex manual steps.
+- Benefits:
+  - Support good practice of regularly restoring prod data into non-prod environments
+  - Supports security good practice of prod and non-prod environments using separate SAML IdPs, Certificates and Private Keys etc.
+  - Ensures that the SAML SP Metadata XML doesn't change, meaning it doesn’t need to be re-shared with the IdP team each time
+  - Removes the manual effort of re-configuring SAML post-database restore
 - The SAML Restore Tool is primarialy intended for use in Liferay PaaS but it can also be used with Liferay DXP Self Hosted if the correct setup is in place in the environment.
 
 ## Non-prod Liferay PaaS Environment Setup ##
