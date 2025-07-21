@@ -96,7 +96,7 @@
 | **SAML_RESTORE_TOOL_ENABLED** | Yes | No | No | Set to true to enable the functionality. If not populated or not set to true then the saml restore functionality won't run. |
 | **SAML_RESTORE_TOOL_CONFIG_PATH** | Yes | No | No | The folder containing the restorable SAML configuration folders. The path is relative to liferay.home portal property, for example /saml-restore-tool-config/virtual-instances will be /opt/liferay/saml-restore-tool-config/virtual-instances in Liferay PaaS. |
 | **SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_{0}** | Yes | Yes | Yes | Value is the new KeyStore Password from the **Steps to setup the 'restorable' KeyStore** section. |
-| **SAML_RESTORE_TOOL_SIGNING_CERTIFICATE_PASSWORD_{0}** | Yes | Yes | Yes | The value is the original password for the (Signing) Certificate and Private Key from SAML Admin > General. |
+| **SAML_RESTORE_TOOL_SIGNING_CERTIFICATE_PASSWORD_{0}** | Yes | Yes | Yes | The value is the original password for the Certificate and Private Key from SAML Admin > General. |
 | **SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_{0}** | No | Yes | Yes | Only needed if the Virtual Instance SAML Admin has a Encryption Certificate and Private Key defined. Value is the original password for the Encryption Certificate and Private Key from SAML Admin > General. |
 
 Sample Liferay service LCP.com extract for the uat environment with a single Virtual Instance with secret.param value of LIFERAY_COM using the @ secrets syntax:
