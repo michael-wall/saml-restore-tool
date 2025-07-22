@@ -34,7 +34,7 @@
 | saml.enabled | boolean | SP | SAML Admin > General > Enabled. Set this to false to restore the SAML configuration but not enable it. SAML can be manually enabled through the SAML Admin GUI afterwards.|
 | saml.sp.entity.id | String | SP | SAML Admin > General > Entity ID. |
 | key.store.file | String | SP | The restorable KeyStore file name. The KeyStore file must exist in the same folder as this properties file. |
-| has.encryption.cert | boolean | SP | Whether or not SAML Admin > General > Encryption Certificate and Private Key is defined. |
+| has.encryption.certificate | boolean | SP | Whether or not SAML Admin > General > Encryption Certificate and Private Key is defined. |
 | saml.sp.assertion.signature.required | boolean | SP | SAML Admin > Service Provider > Require Assertion Signature? |
 | saml.sp.clock.skew | long | SP | SAML Admin > Service Provider > Clock Skew. |
 | saml.sp.ldap.import.enabled | boolean | SP | SAML Admin > Service Provider > LDAP Import Enabled. |
@@ -171,7 +171,8 @@ Sample Liferay service LCP.com extract for the uat environment with a single Vir
   - This can be checked in Control Panel > System Settings > Security > SSO > SAML KeyStoreManager Implementation Configuration > Keystore Manager Target. Ensure that Document Library Keystore Manager is in use. If not set then is is using the Filesystem Keystore Manager.
   - Document Library Keystore Manager is the recommended Keystore Manager for Liferay PaaS due to known issues with Filesystem Keystore Manager in a clustered environment: https://learn.liferay.com/l/33767483
   - Note that changing this setting once SAML has been configured will NOT copy the existing Certificates and Private Keys to the new Keystore. If it needs to be changed take a copy of the existing keystore (e.g. /opt/liferay/data/keystore.jks) and for each SAML enabled Virtual Instance:
-    - Export > Export Key Pair in PKCS#12 format using KeyStore Exporter and Import after the Keystore Manager is changed using the SAML Admin > General GUI. Then test the SAML integration in the Virtual Instance to ensure it is still functioning as expected. Exporting and importing ensures the SAML will continue working without the need to share a new SP Metadata file with the IdP team etc.
+    - Export > Export Key Pair in PKCS#12 format using KeyStore Exporter before the Keystore Manager is changed. Repeat for Encryption Certificate and Private Key if applicable.
+    - Import after the Keystore Manager is changed using the SAML Admin > General GUI. Then test the SAML integration in the Virtual Instance to ensure it is still functioning as expected. Exporting and importing ensures the SAML will continue working without the need to share a new SP Metadata file with the IdP team etc.
 - Liferay DXP stores the SAML Admin > Identity Provider Connections > Connection setting 'Keep Alive URL' value in the database as a Custom Field rather than in the SamlSpPdpConnection table.
   - As a result this field is NOT restored and it will reset to empty. If this field is required, it should be updated manually through the SAML Admin GUI after the Gogo shell command is run.
 - The setup for the SAML Admin > Identity Provider Connections > Connection screen must use an IdP Metadata XML file, not an IdP Metadata URL.
