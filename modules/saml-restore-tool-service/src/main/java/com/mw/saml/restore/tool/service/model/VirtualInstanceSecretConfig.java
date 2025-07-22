@@ -8,8 +8,10 @@ public class VirtualInstanceSecretConfig {
 		super();
 	}
 	
-	public boolean isValid() {
+	public boolean isValid(boolean hasEncryptionCertificate) {
 		if (Validator.isNull(_keyStorePassword) || Validator.isNull(_signingCertificatePassword)) return false;
+		
+		if (hasEncryptionCertificate && Validator.isNull(_encryptionCertificatePassword)) return false;
 		
 		return true;
 	}

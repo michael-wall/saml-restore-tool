@@ -38,7 +38,7 @@ public class SamlRestoreToolConstants {
 			
 			public static final String SAML_SP_ENTITY_ID = "saml.sp.entity.id";
 			
-			public static final String HAS_ENCRYPTION_CERT = "has.encryption.cert";
+			public static final String HAS_ENCRYPTION_CERTIFICATE = "has.encryption.certificate";
 			
 			public static final String KEY_STORE_FILE = "key.store.file";
 		}

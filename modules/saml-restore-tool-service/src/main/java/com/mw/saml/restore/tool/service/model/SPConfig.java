@@ -8,7 +8,7 @@ public class SPConfig {
 		boolean requireAssertionSignature, long clockSkew,
 		boolean ldapImportEnabled, boolean signAuthnRequests,
 		boolean signMetadata, boolean sslRequired,
-		boolean allowShowingLoginPortlet, boolean hasEncryptionCert,
+		boolean allowShowingLoginPortlet, boolean hasEncryptionCertificate,
 		boolean samlEnabled, String samlSpEntityId) {
 
 		_requireAssertionSignature = requireAssertionSignature;
@@ -18,7 +18,7 @@ public class SPConfig {
 		_signMetadata = signMetadata;
 		_sslRequired = sslRequired;
 		_allowShowingLoginPortlet = allowShowingLoginPortlet;
-		_hasEncryptionCert = hasEncryptionCert;
+		_hasEncryptionCertificate = hasEncryptionCertificate;
 		_samlEnabled = samlEnabled;
 		_samlSpEntityId = samlSpEntityId;
 	}
@@ -57,8 +57,8 @@ public class SPConfig {
 		return _allowShowingLoginPortlet;
 	}
 	
-	public boolean hasEncryptionCert() {
-		return _hasEncryptionCert;
+	public boolean hasEncryptionCertificate() {
+		return _hasEncryptionCertificate;
 	}
 
 	public boolean isSamlEnabled() {
@@ -76,7 +76,7 @@ public class SPConfig {
 	private boolean _signMetadata;
 	private boolean _sslRequired;
 	private boolean _allowShowingLoginPortlet;
-	private boolean _hasEncryptionCert;
+	private boolean _hasEncryptionCertificate;
 	private boolean _samlEnabled;
 	private String _samlSpEntityId;
 }

@@ -40,7 +40,7 @@ public class SamlRestoreToolUtil {
 				PortletPropsKeys.SAML_KEYSTORE_CREDENTIAL_PASSWORD,
 				virtualInstanceConfig.getSigningCertificatePassword());
 
-			if (spConfig.hasEncryptionCert()) {
+			if (spConfig.hasEncryptionCertificate()) {
 				unicodeProperties.setProperty(
 					PortletPropsKeys.
 						SAML_KEYSTORE_ENCRYPTION_CREDENTIAL_PASSWORD,
@@ -192,14 +192,14 @@ public class SamlRestoreToolUtil {
 		boolean signMetadata = GetterUtil.get(properties.getProperty(PortletPropsKeys.SAML_SIGN_METADATA), false);
 		boolean sslRequired = GetterUtil.get(properties.getProperty(PortletPropsKeys.SAML_SSL_REQUIRED), false);
 		boolean allowShowingLoginPortlet = GetterUtil.get(properties.getProperty(PortletPropsKeys.SAML_SP_ALLOW_SHOWING_THE_LOGIN_PORTLET), false);
-		boolean hasEncryptionCert = GetterUtil.get(properties.getProperty(SamlRestoreToolConstants.PROPERTIES.SP.HAS_ENCRYPTION_CERT), true);
+		boolean hasEncryptionCertificate = GetterUtil.get(properties.getProperty(SamlRestoreToolConstants.PROPERTIES.SP.HAS_ENCRYPTION_CERTIFICATE), false); // Default is false...
 		boolean samlEnabled = GetterUtil.get(properties.getProperty(SamlRestoreToolConstants.PROPERTIES.SP.SAML_ENABLED), false);
 		String samlSpEntityId = properties.getProperty(SamlRestoreToolConstants.PROPERTIES.SP.SAML_SP_ENTITY_ID);
 
 		return new SPConfig(
 			requireAssertionSignature, clockSkew, ldapImportEnabled,
 			signAuthnRequests, signMetadata, sslRequired,
-			allowShowingLoginPortlet, hasEncryptionCert, samlEnabled,
+			allowShowingLoginPortlet, hasEncryptionCertificate, samlEnabled,
 			samlSpEntityId);
 	}
 	

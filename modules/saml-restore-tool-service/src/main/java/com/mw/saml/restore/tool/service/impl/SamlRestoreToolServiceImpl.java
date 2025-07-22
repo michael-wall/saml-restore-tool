@@ -201,6 +201,7 @@ public class SamlRestoreToolServiceImpl {
 				
 				String virtualHost = samlAdminConfigurationProperties.getProperty(SamlRestoreToolConstants.PROPERTIES.MAPPING.COMPANY_VIRTUAL_HOST);
 				String secretParamValue = samlAdminConfigurationProperties.getProperty(SamlRestoreToolConstants.PROPERTIES.MAPPING.SECRET_PARAM);
+				boolean hasEncryptionCertificate = Boolean.parseBoolean(samlAdminConfigurationProperties.getProperty(SamlRestoreToolConstants.PROPERTIES.SP.HAS_ENCRYPTION_CERTIFICATE, "false"));
 				
 				if (!Validator.isNull(virtualHost)) {
 					company = _companyLocalService.fetchCompanyByVirtualHost(virtualHost);
@@ -215,10 +216,10 @@ public class SamlRestoreToolServiceImpl {
 					continue; // Skip to next folder
 				}
 					
-				VirtualInstanceSecretConfig virtualInstanceConfig = _getVirtualInstanceConfig(secretParamValue);
+				VirtualInstanceSecretConfig virtualInstanceConfig = _getVirtualInstanceConfig(secretParamValue, hasEncryptionCertificate);
 					
 				//Validate the secrets exist etc.
-				if (!virtualInstanceConfig.isValid()) {
+				if (!virtualInstanceConfig.isValid(hasEncryptionCertificate)) {
 					_log.info(virtualInstanceFolderName + ": Mandatory secrets not configured as expected.");
 
 					virtualInstanceErrorCount ++;
@@ -239,7 +240,7 @@ public class SamlRestoreToolServiceImpl {
 				}
 				
 				if (!_samlProviderConfigurationHelper.isRoleSp()) {
-					_log.info(virtualInstanceFolderName + ": Unexpected SAML Role.");
+					_log.info(virtualInstanceFolderName + ": Unexpected SAML Role. Liferay must be a SAML Service Provider (SP).");
 
 					virtualInstanceErrorCount ++;
 					virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
@@ -248,17 +249,6 @@ public class SamlRestoreToolServiceImpl {
 				}
 				
 				spConfig = SamlRestoreToolUtil.parseSPConfig(samlAdminConfigurationProperties);
-
-				if (spConfig.hasEncryptionCert() && Validator.isNull(virtualInstanceConfig.getEncryptionCertificatePassword())) {
-					String encryptionCertificatePasswordEnvVar = SamlRestoreToolConstants.ENVIRONMENT_VARIABLES.SECRET.SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_PARAM.replaceAll("\\{0\\}", secretParamValue);
-						
-					_log.info(virtualInstanceFolderName + ": Secret " + encryptionCertificatePasswordEnvVar + " is missing.");
-
-					virtualInstanceErrorCount ++;
-					virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
-						
-					continue; // Skip to next folder
-				}				
 
 				for (int i = 1; i <= 10; i++) { // Assume no more than 10...
 					String dynamicPrefix = _idpPopertyPrefix(i);
@@ -314,7 +304,7 @@ public class SamlRestoreToolServiceImpl {
 					continue; // Skip to next folder
 				}
 
-				KeyStore virtualInstanceKeyStore = _replaceVirtualInstanceKeyStore(spConfig.hasEncryptionCert(), spConfig.getSamlSpEntityId(), instanceFolder, restorableKeyStoreFileName, virtualInstanceConfig, virtualInstanceFolderName);
+				KeyStore virtualInstanceKeyStore = _replaceVirtualInstanceKeyStore(spConfig.hasEncryptionCertificate(), spConfig.getSamlSpEntityId(), instanceFolder, restorableKeyStoreFileName, virtualInstanceConfig, virtualInstanceFolderName);
 
 				if (Validator.isNull(virtualInstanceKeyStore)) {
 					_log.error(virtualInstanceFolderName + ": An error occurred updating the KeyStore.");
@@ -516,7 +506,7 @@ public class SamlRestoreToolServiceImpl {
 	}
 
 	private KeyStore _replaceVirtualInstanceKeyStore(
-		boolean hasEncryptionCert, String samlSpEntityId, File instanceFolder, String restorableKeyStoreFileName,
+		boolean hasEncryptionCertificate, String samlSpEntityId, File instanceFolder, String restorableKeyStoreFileName,
 		VirtualInstanceSecretConfig virtualInstanceConfig, String virtualInstanceFolderName) {
 
 		KeyStore restorableKeyStore = null;
@@ -577,7 +567,7 @@ public class SamlRestoreToolServiceImpl {
 		}
 	
 		// check if the encryption certificate exists
-		if (hasEncryptionCert) {
+		if (hasEncryptionCertificate) {
 			boolean encryptionCertificateVerified = _verifyEncryptionCertificate(samlSpEntityId, virtualInstanceConfig, tempKeyStore);
 			
 			if (encryptionCertificateVerified) {
@@ -625,7 +615,7 @@ public class SamlRestoreToolServiceImpl {
 		}
 	}
 	
-	private VirtualInstanceSecretConfig _getVirtualInstanceConfig(String secretParamValue) {
+	private VirtualInstanceSecretConfig _getVirtualInstanceConfig(String secretParamValue, boolean hasEncryptionCertificate) {
 		
 		VirtualInstanceSecretConfig virtualInstanceConfig = new VirtualInstanceSecretConfig();
 
@@ -635,10 +625,12 @@ public class SamlRestoreToolServiceImpl {
 		String signingCertificatePassword = System.getenv(getEnvironmentVariableName(SamlRestoreToolConstants.ENVIRONMENT_VARIABLES.SECRET.SAML_RESTORE_TOOL_SIGNING_CERTIFICATE_PASSWORD_PARAM, secretParamValue));
 		virtualInstanceConfig.setSigningCertificatePassword(signingCertificatePassword);
 		
-		// Optional...
-		String encryptionCertificatePassword = System.getenv(getEnvironmentVariableName(SamlRestoreToolConstants.ENVIRONMENT_VARIABLES.SECRET.SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_PARAM, secretParamValue));
-		virtualInstanceConfig.setEncryptionCertificatePassword(encryptionCertificatePassword);
-
+		if (hasEncryptionCertificate) {
+			// Optional...
+			String encryptionCertificatePassword = System.getenv(getEnvironmentVariableName(SamlRestoreToolConstants.ENVIRONMENT_VARIABLES.SECRET.SAML_RESTORE_TOOL_ENCRYPTION_CERTIFICATE_PASSWORD_PARAM, secretParamValue));
+			virtualInstanceConfig.setEncryptionCertificatePassword(encryptionCertificatePassword);			
+		}
+		
 		return virtualInstanceConfig;
 	}
 	
