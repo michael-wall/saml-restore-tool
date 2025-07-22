@@ -54,13 +54,13 @@
 | idp1.user.identifier.expression | String | IdP | Get from SamlSpIdPConnection table, userIdentifierExpression column value for this SAML IdP record. **\*** |
 | idp1.assertion.signature.required | boolean | IdP | Get from SamlSpIdPConnection table, assertionSignatureRequired column value for this SAML IdP record. 0 means false, 1 means true. **\*** |
 | idp1.ldap.import.enabled | boolean | IdP | Get from SamlSpIdPConnection table, ldapImportEnabled column value for this SAML IdP record. 0 means false, 1 means true. **\*** |
-| idp1.sign.authn.request | boolean | IdP | Get from SamlSpIdPConnection table, forceAuthn column value for this SAML IdP record. 0 means false, 1 means true. **\*** |
+| idp1.sign.authn.request | boolean | IdP | Get from SamlSpIdPConnection table, signAuthnRequest column value for this SAML IdP record. 0 means false, 1 means true. **\*** |
 
 - The SAML Restore Tool supports non-prod environments with multiple Virtual Instances as well as multiple SAML Identify Providers per Virtual Instance.
 - Repeat the SAML Identity Provider properties with prefix **idp1.** for additional IdPs in the same Virtual Instance, using **idp2.** prefix for the second IdP, **idp3.** prefix for third IdP etc.
-  - Note that properties in format connection.name and idp0.connection.name are not valid IdP property keys.
+  - Note that properties in format connection.name, idp.connection.name, idp0.connection.name etc. are not valid IdP property keys.
 - Use the mysql or psql client from the non-prod environment Liferay service shell to check the SamlSpIdPConnection table values e.g.
-  - select userAttributeMappings, userIdentifierExpression from SamlSpIdPConnection where name = 'MW IdP';
+  - select nameIdFormat, userAttributeMappings, userIdentifierExpression, assertionSignatureRequired, ldapImportEnabled, signAuthnRequest where name = 'MW IdP' and companyId = 99999;
 
 ## Steps to setup the restorable KeyStore ##
 - Use these steps to export the existing non-prod environment KeyStore for the Virtual Instance, so that the contents of the KeyStore can then be imported after the Backup and Restore has completed.
