@@ -100,11 +100,11 @@ public class SamlRestoreToolUtil {
 
 			return properties;
 		} catch (FileNotFoundException e) {
-			_log.error(e.getClass() + ": " + e.getMessage());	
+			_log.error(e.getClass() + ": " + e.getMessage(), e);
 		} catch (IOException e) {
-			_log.error(e.getClass() + ": " + e.getMessage());
+			_log.error(e.getClass() + ": " + e.getMessage(), e);
 		} catch (Exception e) {
-			_log.error(e.getClass() + ": " + e.getMessage());				
+			_log.error(e.getClass() + ": " + e.getMessage(), e);
 		} finally {
 			if (propertiesInputStream != null) {
 				try {

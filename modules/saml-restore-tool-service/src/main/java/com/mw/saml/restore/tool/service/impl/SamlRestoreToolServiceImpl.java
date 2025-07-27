@@ -351,7 +351,7 @@ public class SamlRestoreToolServiceImpl {
 				virtualInstanceErrorCount++;
 				virtualInstancesSAMLRestoreUnsuccessful.add(virtualInstanceFolderName);
 				
-				_log.error(e.getClass() + ": " + e.getMessage());
+				_log.error(e.getClass() + ": " + e.getMessage(), e);
 
 				try {
 					if (Validator.isNotNull(spConfig)) { // Deactivate SAML if we know an error occurred during processing..
@@ -359,7 +359,7 @@ public class SamlRestoreToolServiceImpl {
 					}
 				} catch (Exception ex) {
 					_log.error(virtualInstanceFolderName + ": Error trying to disable SAML Configuration for SP Entity ID " + spConfig.getSamlSpEntityId() + ".");
-					_log.error(ex.getClass() + ": " + ex.getMessage());
+					_log.error(ex.getClass() + ": " + ex.getMessage(), e);
 				}
 				
 				continue;
@@ -448,13 +448,13 @@ public class SamlRestoreToolServiceImpl {
 			
 		} catch (PortalException e) {
 			_log.error(virtualInstanceFolderName + ": Unable to add IdP Connection with IdP Entity ID " + idpConfig.getSamlIdpEntityId() + ".");
-			_log.error(e.getClass() + ": " + e.getMessage());
+			_log.error(e.getClass() + ": " + e.getMessage(), e);
 		} catch (FileNotFoundException e) {
 			_log.error(virtualInstanceFolderName + ": Unable to add IdP Connection with IdP Entity ID " + idpConfig.getSamlIdpEntityId() + ".");
-			_log.error(e.getClass() + ": " + e.getMessage());		
+			_log.error(e.getClass() + ": " + e.getMessage(), e);
 		} catch (Exception e) {
 			_log.error(virtualInstanceFolderName + ": Unable to add IdP Connection with IdP Entity ID " + idpConfig.getSamlIdpEntityId() + ".");
-			_log.error(e.getClass() + ": " + e.getMessage());		
+			_log.error(e.getClass() + ": " + e.getMessage(), e);
 		} finally {
 			if (metadataXMLInputStream != null) {
 				try {
@@ -496,10 +496,10 @@ public class SamlRestoreToolServiceImpl {
 					_samlSpIdpConnectionLocalService.deleteSamlSpIdpConnection(i.getSamlSpIdpConnectionId());
 				} catch (PortalException e) {
 					_log.error(virtualInstanceFolderName + ": Error while trying to delete the SAML IdP Connection with Name " + i.getName() + ".");
-					_log.error(e.getClass() + ": " + e.getMessage());
+					_log.error(e.getClass() + ": " + e.getMessage(), e);
 				} catch (Exception e) {
 					_log.error(virtualInstanceFolderName + ": Error while trying to delete the SAML IdP Connection with Name " + i.getName() + ".");
-					_log.error(e.getClass() + ": " + e.getMessage());
+					_log.error(e.getClass() + ": " + e.getMessage(), e);
 				}
 			}
 		);
@@ -535,7 +535,7 @@ public class SamlRestoreToolServiceImpl {
 		}
 		catch (Exception e) {
 			_log.error(virtualInstanceFolderName + ": Error calling _replaceVirtualInstanceKeyStore for SP Entity ID " + samlSpEntityId + ".");	
-			_log.error(e.getClass() + ": " + e.getMessage());
+			_log.error(e.getClass() + ": " + e.getMessage(), e);
 			
 			return null;
 		} finally {
@@ -551,9 +551,9 @@ public class SamlRestoreToolServiceImpl {
 		try {
 			tempKeyStore = _keyStoreManager.getKeyStore();
 		} catch (KeyStoreException e) {
-			_log.error(e.getClass() + ": " + e.getMessage());
+			_log.error(e.getClass() + ": " + e.getMessage(), e);
 		} catch (Exception e) {
-			_log.error(e.getClass() + ": " + e.getMessage());
+			_log.error(e.getClass() + ": " + e.getMessage(), e);
 		}
 
 		boolean signingCertificateVerified = _verifySigningCertificate(samlSpEntityId, virtualInstanceConfig, tempKeyStore);
@@ -595,7 +595,7 @@ public class SamlRestoreToolServiceImpl {
 			
 			return true;
 		} catch (Exception e) {
-			_log.error(e.getClass() + ": " + e.getMessage());
+			_log.error(e.getClass() + ": " + e.getMessage(), e);
 			
 			return false;
 		}
@@ -609,7 +609,7 @@ public class SamlRestoreToolServiceImpl {
 			
 			return true;
 		} catch (Exception e) {
-			_log.error(e.getClass() + ": " + e.getMessage());
+			_log.error(e.getClass() + ": " + e.getMessage(), e);
 			
 			return false;
 		}
