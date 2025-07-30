@@ -78,7 +78,6 @@
   - Make a note of the new KeyStore Password as it will be used as the SAML_CONFIG_RESTORE_KEYSTORE_PASSWORD_{0} value for the Virtual Instance.
 
 ## Steps to setup the Environment Variables ##
-
 - Add the following Environment Variables to the environments Liferay Service via the Liferay Service LCP.json.
   - The ones marked 'Per Virtual Instance' should be created for each SAML enabled Virtual Instance in the environment.
   	- Replace {0} with the secret.param value from saml-admin-configuration.properties _ e.g. a secret.param value of LIFERAY_COM would correspond to SAML_RESTORE_TOOL_KEYSTORE_PASSWORD_LIFERAY_COM
@@ -198,5 +197,3 @@ Sample Liferay service LCP.com extract for the uat environment with a single Vir
 - https://keystore-explorer.org/
 - https://learn.liferay.com/w/dxp/cloud/reference/command-line-tool
 - https://learn.liferay.com/w/dxp/cloud/reference/command-line-tool#downloading-files-from-the-liferay-service
-- https://learn.liferay.com/w/dxp/security-and-administration/users-and-permissions/roles-and-permissions/configuring-a-password-policy
-- https://learn.liferay.com/w/dxp/security-and-administration/security/multi-factor-authentication
